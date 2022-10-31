@@ -72,7 +72,7 @@ namespace OnceTwoTree_game1
                 }
                 
             }
-            else if (Bounds.Position.Y - _game.GetCameraPosY() >= 792)
+            else if (Bounds.Position.Y + 108 - _game.GetCameraPosY() >= 756)
             {
                 move = new Vector2(0, -42) * gameTime.GetElapsedSeconds() * 50;
                 _game.UpdateCameraY(move);

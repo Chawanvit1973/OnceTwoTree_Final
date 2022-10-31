@@ -33,6 +33,8 @@ namespace OnceTwoTree_game1
         TiledMapRenderer _tiledMapRenderer;
 
         TiledMapObjectLayer _platformTiledObj;
+
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
