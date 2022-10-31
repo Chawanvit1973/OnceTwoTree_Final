@@ -96,6 +96,7 @@ namespace OnceTwoTree_game1
 
             _tiledMapRenderer.Update(gameTime);
             _collisionComponent.Update(gameTime);
+            //Start look at
             _camera.LookAt(_bgPosition + _cameraPosition);
 
 
