@@ -15,9 +15,10 @@ namespace OnceTwoTree_game1
     {
         private readonly Game1 _game;
 
-        public int Velocity = 4;
+        public int Velocity = 24;
         Vector2 move;
         Vector2 playerPos;
+        Vector2 pos;
         public IShapeF Bounds { get; }
 
         private KeyboardState _currentKey;
@@ -45,25 +46,35 @@ namespace OnceTwoTree_game1
             if(_currentKey.IsKeyDown(Keys.D) && Bounds.Position.X < _game.GetMapWidth() - ((RectangleF)Bounds).Width)
             {
                 move = new Vector2(Velocity, 0) * gameTime.GetElapsedSeconds() * 50;
-                if(Bounds.Position.X - _game.GetCameraPosX() >= 400 
+                if (Bounds.Position.X - _game.GetCameraPosX() >= 400
                     && _game.GetCameraPosX() < _game.GetMapWidth() - 1728)
                 {
-                    _game.UpdateCamera(move);
+                    _game.UpdateCameraX(move);
                 }
                 Bounds.Position += move;
             }
-            else if(_currentKey.IsKeyDown(Keys.A) && Bounds.Position.X > 0)
+            else if (_currentKey.IsKeyDown(Keys.A) && Bounds.Position.X > 0)
             {
                 move = new Vector2(-Velocity, 0) * gameTime.GetElapsedSeconds() * 50;
-                if(Bounds.Position.X - _game.GetCameraPosX() <= 300
-                    && _game.GetCameraPosX()> 0)
+                if (Bounds.Position.X - _game.GetCameraPosX() <= 300
+                    && _game.GetCameraPosX() > 0)
                 {
-                    _game.UpdateCamera(move);
+                    _game.UpdateCameraX(move);
                 }
                 Bounds.Position += move;
             }
+            if (_currentKey.IsKeyDown(Keys.W) && isGrounded == true)
+            {
+                move = new Vector2(0, 42) * gameTime.GetElapsedSeconds() * 50;
+                _game.UpdateCameraY(move);
+            }
+            else if (Bounds.Position.Y - _game.GetCameraPosY() >= 789)
+            {
+                move = new Vector2(0, -42) * gameTime.GetElapsedSeconds() * 50;
+                _game.UpdateCameraY(move);
+            }
 
-            if(isJumping && force < 0)
+            if (isJumping && force < 0)
             {
                 isJumping = false;
             }
@@ -76,16 +87,15 @@ namespace OnceTwoTree_game1
 
             if (isJumping)
             {
-                jumpSpeed = -12;
+                jumpSpeed = -42;
              
                 force -= gameTime.GetElapsedSeconds() * 32;
                 
             }
             else
             {
-                jumpSpeed = 8; 
+                jumpSpeed = 28; 
             }
-
             Bounds.Position += new Vector2(0, jumpSpeed) * gameTime.GetElapsedSeconds() * 50;
             
             

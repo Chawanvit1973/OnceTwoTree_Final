@@ -123,15 +123,29 @@ namespace OnceTwoTree_game1
         {
             return MapWidth;
         }
+        public int GetMapHeight()
+        {
+            return MapHeight;
+        }
 
-        public void UpdateCamera(Vector2 move)
+        public void UpdateCameraX(Vector2 move)
         {
             _cameraPosition += move;
+        }
+
+        public void UpdateCameraY(Vector2 move)
+        {
+            _cameraPosition -= move;
         }
 
         public float GetCameraPosX()
         {
             return _cameraPosition.X;
+        }
+
+        public float GetCameraPosY()
+        {
+            return _cameraPosition.Y;
         }
     }
 }
