@@ -15,7 +15,7 @@ namespace OnceTwoTree_game1
     {
         private readonly Game1 _game;
 
-        public int Velocity = 4;
+        public int Velocity = 8;
         Vector2 move;
         Vector2 playerPos;
         public IShapeF Bounds { get; }
@@ -45,7 +45,7 @@ namespace OnceTwoTree_game1
             if(_currentKey.IsKeyDown(Keys.D) && Bounds.Position.X < _game.GetMapWidth() - ((RectangleF)Bounds).Width)
             {
                 move = new Vector2(Velocity, 0) * gameTime.GetElapsedSeconds() * 50;
-                if(Bounds.Position.X - _game.GetCameraPosX() >= 400 
+                if(Bounds.Position.X - _game.GetCameraPosX() >= 1728/2
                     && _game.GetCameraPosX() < _game.GetMapWidth() - 1728)
                 {
                     _game.UpdateCamera(move);
@@ -55,7 +55,7 @@ namespace OnceTwoTree_game1
             else if(_currentKey.IsKeyDown(Keys.A) && Bounds.Position.X > 0)
             {
                 move = new Vector2(-Velocity, 0) * gameTime.GetElapsedSeconds() * 50;
-                if(Bounds.Position.X - _game.GetCameraPosX() <= 300
+                if(Bounds.Position.X - _game.GetCameraPosX() <= 400
                     && _game.GetCameraPosX()> 0)
                 {
                     _game.UpdateCamera(move);
@@ -83,7 +83,7 @@ namespace OnceTwoTree_game1
             }
             else
             {
-                jumpSpeed = 8; 
+                jumpSpeed = 20; 
             }
 
             Bounds.Position += new Vector2(0, jumpSpeed) * gameTime.GetElapsedSeconds() * 50;
