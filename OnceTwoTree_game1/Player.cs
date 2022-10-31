@@ -63,12 +63,16 @@ namespace OnceTwoTree_game1
                 }
                 Bounds.Position += move;
             }
-            if (_currentKey.IsKeyDown(Keys.W) && isGrounded == true)
+            if (_currentKey.IsKeyDown(Keys.W) && Bounds.Position.Y - _game.GetCameraPosY() <= 864)
             {
                 move = new Vector2(0, 42) * gameTime.GetElapsedSeconds() * 50;
-                _game.UpdateCameraY(move);
+                if (Bounds.Position.Y - _game.GetCameraPosY() <= 864)
+                {
+                    _game.UpdateCameraY(move);
+                }
+                
             }
-            else if (Bounds.Position.Y - _game.GetCameraPosY() >= 789)
+            else if (Bounds.Position.Y - _game.GetCameraPosY() >= 792)
             {
                 move = new Vector2(0, -42) * gameTime.GetElapsedSeconds() * 50;
                 _game.UpdateCameraY(move);
@@ -96,6 +100,7 @@ namespace OnceTwoTree_game1
             {
                 jumpSpeed = 28; 
             }
+
             Bounds.Position += new Vector2(0, jumpSpeed) * gameTime.GetElapsedSeconds() * 50;
             
             
