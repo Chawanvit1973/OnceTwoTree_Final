@@ -28,7 +28,6 @@ namespace OnceTwoTree_game1
 
         private readonly List<IEntity> _entities = new List<IEntity>();
         public readonly CollisionComponent _collisionComponent;
-
         public SpriteFont font;
         Texture2D block; 
 
@@ -36,10 +35,11 @@ namespace OnceTwoTree_game1
         TiledMapRenderer _tiledMapRenderer;
 
         TiledMapObjectLayer _platformTiledObj;
+        TiledMapObjectLayer _climbObj;
 
-        bool openConfig = true;
+        bool openConfig = false;
         bool isKeyDown = false;
-
+        
         Vector2 oldPosCam;
         public Game1()
         {
@@ -62,9 +62,11 @@ namespace OnceTwoTree_game1
 
         protected override void LoadContent()
         {
-            _tiledMap = Content.Load<TiledMap>("TileManagement\\Platform_TileMap");
             font = Content.Load<SpriteFont>("Font");
             block = Content.Load<Texture2D>("Resources\\TileSet\\block");
+
+            //Load Tilemap
+            _tiledMap = Content.Load<TiledMap>("TileManagement\\Platform_TileMap");
             _tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, _tiledMap);
 
             //Get Obj layers
@@ -76,6 +78,15 @@ namespace OnceTwoTree_game1
                 }
             }
 
+            //Get Climb Obj
+            foreach(TiledMapObjectLayer layer in _tiledMap.ObjectLayers)
+            {
+                if(layer.Name == "ClimbObj")
+                {
+                    _climbObj = layer;
+                }
+            }
+
             //Create entities from Map
             foreach(TiledMapObject obj in _platformTiledObj.Objects)
             {
@@ -83,8 +94,17 @@ namespace OnceTwoTree_game1
                 _entities.Add(new PlatForm(this, new RectangleF(position, obj.Size)));
             }
 
+            //Create ClimbObj from Map
+            foreach (TiledMapObject obj in _climbObj.Objects)
+            {
+                Point2 position = new Point2(obj.Position.X, obj.Position.Y);
+                _entities.Add(new ClimbOBJ(this, new RectangleF(position, obj.Size)));
+            }
+
             //Setup Player
-            _entities.Add(new Player(this, new RectangleF(new Point2(0, 0), new Size2(108, 108))));
+            _entities.Add(new Player(this, new RectangleF(new Point2(0, MapHeight-108), new Size2(108, 108))));
+            
+
             foreach(IEntity entity in _entities)
             {
                 _collisionComponent.Insert(entity);
@@ -119,6 +139,7 @@ namespace OnceTwoTree_game1
                 entity.Update(gameTime);
                 if (entity.GetType().Name == "Player")
                 {
+                    
                     if (oldPosCam.Y < entity.Bounds.Position.Y - _cameraPosition.Y)
                     {
                         oldPosCam.Y = entity.Bounds.Position.Y - _cameraPosition.Y;
@@ -131,8 +152,9 @@ namespace OnceTwoTree_game1
 
 
             }
-
+            
             _tiledMapRenderer.Update(gameTime);
+
             _collisionComponent.Update(gameTime);
             //Start look at
             _camera.LookAt(_bgPosition + _cameraPosition);
@@ -152,16 +174,19 @@ namespace OnceTwoTree_game1
                 entity.Draw(spriteBatch);
                 if(entity.GetType().Name == "Player")
                 {
+                    Player _player1 = (Player)entity;
                     if (openConfig)
                     {
                         spriteBatch.Draw(block, new Vector2(_cameraPosition.X, _cameraPosition.Y), null, Color.Brown, 0f, Vector2.Zero, new Vector2(4, 2), SpriteEffects.None, 0);
-                        spriteBatch.DrawString(font, "Player Pos = " + entity.Bounds.Position, new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 10), Color.Black);
+                        spriteBatch.DrawString(font, "Player Pos = " + _player1.Bounds.Position, new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 10), Color.Black);
                         spriteBatch.DrawString(font, "Camera Pos = " + _camera.Position, new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 30), Color.Black);
-                        spriteBatch.DrawString(font, "DPos X = " + (entity.Bounds.Position.X - _cameraPosition.X), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 50), Color.Black);
-                        spriteBatch.DrawString(font, "DPos Y = " + (entity.Bounds.Position.Y - _cameraPosition.Y), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 70), Color.Black);
-                        spriteBatch.DrawString(font, "MapWidth = " + (GetMapWidth()), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 90), Color.Black);
-                        spriteBatch.DrawString(font, "MaxHight = " + (oldPosCam.Y), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 110), Color.Black);
-                        spriteBatch.DrawString(font, "MaxWidth = " + (oldPosCam.X), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 130), Color.Black);
+                        spriteBatch.DrawString(font, "DPos X = " + (_player1.Bounds.Position.X - _cameraPosition.X), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 50), Color.Black);
+                        spriteBatch.DrawString(font, "DPos Y = " + (_player1.Bounds.Position.Y - _cameraPosition.Y), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 70), Color.Black);
+                        //spriteBatch.DrawString(font, "MapWidth = " + (GetMapWidth()), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 90), Color.Black);
+                        //spriteBatch.DrawString(font, "MaxHight = " + (oldPosCam.Y), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 110), Color.Black);
+                        //spriteBatch.DrawString(font, "MaxWidth = " + (oldPosCam.X), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 130), Color.Black);
+                        spriteBatch.DrawString(font, "IsGround = " + (_player1.isGrounded), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 90), Color.Black);
+                        spriteBatch.DrawString(font, "Wall Check = " + (_player1.wallCheck), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 110), Color.Black);
                     
                     }
                 }

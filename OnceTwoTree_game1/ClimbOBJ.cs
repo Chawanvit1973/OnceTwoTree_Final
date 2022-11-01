@@ -11,12 +11,12 @@ using MonoGame.Extended.Collisions;
 
 namespace OnceTwoTree_game1
 {
-    public class PlatForm : IEntity
+    public class ClimbOBJ : IEntity
     {
         private readonly Game1 _game;
         public IShapeF Bounds { get; }
-        
-        public PlatForm(Game1 game,RectangleF rectangleF)
+
+        public ClimbOBJ(Game1 game, RectangleF rectangleF)
         {
             _game = game;
             Bounds = rectangleF;
@@ -30,15 +30,14 @@ namespace OnceTwoTree_game1
         public virtual void Draw(SpriteBatch spriteBatch)
         {
 
-            spriteBatch.DrawRectangle((RectangleF)Bounds, Color.Green, 3);
+            spriteBatch.DrawRectangle((RectangleF)Bounds, Color.Red, 3);
         }
 
-        
+
 
         public void OnCollision(CollisionEventArgs collisionInfo)
         {
 
         }
-
     }
 }

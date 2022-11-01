@@ -11,9 +11,11 @@ using MonoGame.Extended.Collisions;
 
 namespace OnceTwoTree_game1
 {
-    internal interface IEntity :ICollisionActor
+    public interface IEntity :ICollisionActor
     {
+        
         public void Update(GameTime gameTime);
         public void Draw(SpriteBatch spriteBatch);
+
     }
 }

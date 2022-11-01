@@ -14,7 +14,7 @@ namespace OnceTwoTree_game1
     public class Player : IEntity
     {
         private readonly Game1 _game;
-        public string name = "Player";
+        public string name;
         public int Velocity = 10;
         Vector2 move;
         Vector2 playerPos;
@@ -24,10 +24,11 @@ namespace OnceTwoTree_game1
         private KeyboardState _currentKey;
         private KeyboardState _oldKey;
 
-        bool isJumping;
-        bool isGrounded;
         public int jumpSpeed;
         float force;
+        public bool isGrounded;
+        public bool isJumping;
+        public bool wallCheck;
 
         public Player(Game1 game,IShapeF circleF)
         {
@@ -37,8 +38,13 @@ namespace OnceTwoTree_game1
             jumpSpeed = -6;
             force = 20;
             isGrounded = false;
+            wallCheck = false;
         }
 
+        public Player(string name)
+        {
+            this.name = name;
+        }
         public virtual void Update(GameTime gameTime)
         {
             _currentKey = Keyboard.GetState();
@@ -127,12 +133,30 @@ namespace OnceTwoTree_game1
                     Bounds.Position -= collisionInfo.PenetrationVector;
                 }
             }
+
+            if (collisionInfo.Other.ToString().Contains("ClimbOBJ"))
+            {
+                if (((RectangleF)Bounds).Right >= ((RectangleF)collisionInfo.Other.Bounds).Left &&
+                    ((RectangleF)Bounds).Left < ((RectangleF)collisionInfo.Other.Bounds).Left)
+                {
+                    wallCheck = true;
+                }
+                else if (((RectangleF)Bounds).Left <= ((RectangleF)collisionInfo.Other.Bounds).Right &&
+                    ((RectangleF)Bounds).Right > ((RectangleF)collisionInfo.Other.Bounds).Right)
+                {
+                    wallCheck = true;
+                }
+            }
+            else { wallCheck = false; }
         }
 
+        
         public string GetName()
         {
             return name;
         }
+
+
 
     }
 }
