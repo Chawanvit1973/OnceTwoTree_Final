@@ -29,6 +29,7 @@ namespace OnceTwoTree_game1
 
         public virtual void Draw(SpriteBatch spriteBatch)
         {
+
             spriteBatch.DrawRectangle((RectangleF)Bounds, Color.Green, 3);
         }
 

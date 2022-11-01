@@ -14,8 +14,8 @@ namespace OnceTwoTree_game1
     public class Player : IEntity
     {
         private readonly Game1 _game;
-
-        public int Velocity = 24;
+        public string name = "Player";
+        public int Velocity = 10;
         Vector2 move;
         Vector2 playerPos;
         Vector2 pos;
@@ -129,7 +129,10 @@ namespace OnceTwoTree_game1
             }
         }
 
-
+        public string GetName()
+        {
+            return name;
+        }
 
     }
 }

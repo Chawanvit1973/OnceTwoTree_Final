@@ -29,12 +29,18 @@ namespace OnceTwoTree_game1
         private readonly List<IEntity> _entities = new List<IEntity>();
         public readonly CollisionComponent _collisionComponent;
 
+        public SpriteFont font;
+        Texture2D block; 
+
         TiledMap _tiledMap;
         TiledMapRenderer _tiledMapRenderer;
 
         TiledMapObjectLayer _platformTiledObj;
 
+        bool openConfig = true;
+        bool isKeyDown = false;
 
+        Vector2 oldPosCam;
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -57,6 +63,8 @@ namespace OnceTwoTree_game1
         protected override void LoadContent()
         {
             _tiledMap = Content.Load<TiledMap>("TileManagement\\Platform_TileMap");
+            font = Content.Load<SpriteFont>("Font");
+            block = Content.Load<Texture2D>("Resources\\TileSet\\block");
             _tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, _tiledMap);
 
             //Get Obj layers
@@ -90,18 +98,45 @@ namespace OnceTwoTree_game1
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
             
+            if(!isKeyDown && Keyboard.GetState().IsKeyDown(Keys.NumPad1))
+            {
+                isKeyDown = true;
+                if (openConfig)
+                {
+                    openConfig = false;
+
+                }
+                else if (!openConfig)
+                {
+                    openConfig = true;
+
+                }
+            }
+            else if(Keyboard.GetState().IsKeyUp(Keys.NumPad1) && isKeyDown){ isKeyDown = false; }
 
             foreach(IEntity entity in _entities)
             {
                 entity.Update(gameTime);
+                if (entity.GetType().Name == "Player")
+                {
+                    if (oldPosCam.Y < entity.Bounds.Position.Y - _cameraPosition.Y)
+                    {
+                        oldPosCam.Y = entity.Bounds.Position.Y - _cameraPosition.Y;
+                    }
+                    if(oldPosCam.X < entity.Bounds.Position.X - _cameraPosition.X)
+                    {
+                        oldPosCam.X = entity.Bounds.Position.X - _cameraPosition.X;
+                    }
+                }
+
+
             }
 
             _tiledMapRenderer.Update(gameTime);
             _collisionComponent.Update(gameTime);
             //Start look at
             _camera.LookAt(_bgPosition + _cameraPosition);
-
-
+            
             base.Update(gameTime);
         }
 
@@ -115,7 +150,26 @@ namespace OnceTwoTree_game1
             foreach(IEntity entity in _entities)
             {
                 entity.Draw(spriteBatch);
+                if(entity.GetType().Name == "Player")
+                {
+                    if (openConfig)
+                    {
+                        spriteBatch.Draw(block, new Vector2(_cameraPosition.X, _cameraPosition.Y), null, Color.Brown, 0f, Vector2.Zero, new Vector2(4, 2), SpriteEffects.None, 0);
+                        spriteBatch.DrawString(font, "Player Pos = " + entity.Bounds.Position, new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 10), Color.Black);
+                        spriteBatch.DrawString(font, "Camera Pos = " + _camera.Position, new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 30), Color.Black);
+                        spriteBatch.DrawString(font, "DPos X = " + (entity.Bounds.Position.X - _cameraPosition.X), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 50), Color.Black);
+                        spriteBatch.DrawString(font, "DPos Y = " + (entity.Bounds.Position.Y - _cameraPosition.Y), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 70), Color.Black);
+                        spriteBatch.DrawString(font, "MapWidth = " + (GetMapWidth()), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 90), Color.Black);
+                        spriteBatch.DrawString(font, "MaxHight = " + (oldPosCam.Y), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 110), Color.Black);
+                        spriteBatch.DrawString(font, "MaxWidth = " + (oldPosCam.X), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 130), Color.Black);
+                    
+                    }
+                }
+                
+
             }
+
+            
 
             spriteBatch.End();
             base.Draw(gameTime);
