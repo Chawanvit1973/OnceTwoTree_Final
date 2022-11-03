@@ -53,8 +53,9 @@ namespace OnceTwoTree_game1
         public virtual void Update(GameTime gameTime)
         {
             _currentKey = Keyboard.GetState();
-            
-            if(_currentKey.IsKeyDown(Keys.D) && Bounds.Position.X < _game.GetMapWidth() - ((RectangleF)Bounds).Width)
+
+            #region A D (Left Right)
+            if (_currentKey.IsKeyDown(Keys.D) && Bounds.Position.X < _game.GetMapWidth() - ((RectangleF)Bounds).Width)
             {
                 isFlip = false;
                 move = new Vector2(Velocity, 0) * gameTime.GetElapsedSeconds() * 50;
@@ -75,41 +76,48 @@ namespace OnceTwoTree_game1
                     _game.UpdateCameraX(move);
                 }
                 Bounds.Position += move;
-            }
-            if (_currentKey.IsKeyDown(Keys.W) && Bounds.Position.Y - _game.GetCameraPosY() <= 864)
+            } 
+            #endregion
+
+            if (_currentKey.IsKeyDown(Keys.W)  && onClimb == true)
             {
-                move = new Vector2(0, 42) * gameTime.GetElapsedSeconds() * 50;
-                if (Bounds.Position.Y - _game.GetCameraPosY() <= 864)
+                move = new Vector2(0, 10) * gameTime.GetElapsedSeconds() * 60;
+                if (_game.GetCameraPosY() - Bounds.Position.Y <= 864)
                 {
                     _game.UpdateCameraY(move);
                 }
-                
+
             }
-            else if (Bounds.Position.Y + 108 - _game.GetCameraPosY() >= 756)
+            else if (Bounds.Position.Y + 108 - _game.GetCameraPosY() >= (_game.GetMapHeight()-216))
             {
-                move = new Vector2(0, -42) * gameTime.GetElapsedSeconds() * 50;
+                move = new Vector2(0, (-Gfroce * 2)) * gameTime.GetElapsedSeconds() * 50;
                 _game.UpdateCameraY(move);
             }
-            
-            if (_currentKey.IsKeyDown(Keys.W) && _oldKey.IsKeyUp(Keys.W) && (wallCheckRight == true || wallCheckLeft ==true) )
+
+            if (_currentKey.IsKeyDown(Keys.W) && onClimb == true)
+            {
+                Bounds.Position -= new Vector2(0, 10);
+            }
+
+            if (_currentKey.IsKeyDown(Keys.W) && _oldKey.IsKeyUp(Keys.W) && (wallCheckRight == true || wallCheckLeft == true))
             {
                 if (!onClimb) { onClimb = true; }
                 else if (onClimb) { onClimb = false; }
             }
-            
-            if(wallCheckRight == false && wallCheckLeft == false)
+
+            if (wallCheckRight == false && wallCheckLeft == false)
             {
                 onClimb = false;
             }
 
-            if (_currentKey.IsKeyDown(Keys.D1))
+            /*if (_currentKey.IsKeyDown(Keys.D1))
             {
                 Bounds.Position -= new Vector2(0,10);
-            }
+            }*/
 
             if (!onClimb)
             {
-                Bounds.Position += new Vector2(0, Gfroce) * gameTime.GetElapsedSeconds() * 50;
+                Bounds.Position += new Vector2(0, (Gfroce * 2)) * gameTime.GetElapsedSeconds() * 50;
             }
 
             if (countG > 10) { countG = 0; }
@@ -155,7 +163,7 @@ namespace OnceTwoTree_game1
                     wallCheckRight = true;
                     if (onClimb)
                     {
-                        Bounds.Position = new Vector2(((RectangleF)collisionInfo.Other.Bounds).Position.X - ((RectangleF)collisionInfo.Other.Bounds).Size.Width, Bounds.Position.Y);
+                        Bounds.Position = new Vector2(((RectangleF)collisionInfo.Other.Bounds).Position.X - ((RectangleF)collisionInfo.Other.Bounds).Size.Width - 15, Bounds.Position.Y);
                         //End of Climbing
                         if (((RectangleF)Bounds).Top + (((RectangleF)Bounds).Size.Height * 3 / 4) < ((RectangleF)collisionInfo.Other.Bounds).Top)
                         {
