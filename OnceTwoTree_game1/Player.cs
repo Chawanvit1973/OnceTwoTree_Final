@@ -35,8 +35,8 @@ namespace OnceTwoTree_game1
         public bool onClimb;
 
         #region SkillCheck var
-        public Vector2 barPos, leftHandPos, rightHandPos,triggerPos;
-
+        public Vector2 barPos, leftHandPos, rightHandPos,triggerPos,insideBarPos,dropBarPos,checkBarPosL,checkBarPosR;
+        public Vector2 dropBarScale, checkBarScaleL, checkBarScaleR;
 
         #endregion
         //public CollisionEventArgs _currentBlock;
