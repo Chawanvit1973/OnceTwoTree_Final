@@ -155,7 +155,6 @@ namespace OnceTwoTree_game1
                     }
                 }
 
-
             }
             
             _tiledMapRenderer.Update(gameTime);
