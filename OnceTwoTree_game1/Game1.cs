@@ -26,6 +26,7 @@ namespace OnceTwoTree_game1
         public static Vector2 _cameraPosition;
         public static Vector2 _bgPosition;
         public Vector2 _panelPos;
+        
         private readonly List<IEntity> _entities = new List<IEntity>();
         public readonly CollisionComponent _collisionComponent;
         public SpriteFont font;

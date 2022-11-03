@@ -33,8 +33,12 @@ namespace OnceTwoTree_game1
         public bool isFlip;
         public bool wallCheckLeft, wallCheckRight;
         public bool onClimb;
-        
 
+        #region SkillCheck var
+        public Vector2 barPos, leftHandPos, rightHandPos,triggerPos;
+
+
+        #endregion
         //public CollisionEventArgs _currentBlock;
         public Player(Game1 game,IShapeF circleF)
         {
@@ -107,6 +111,7 @@ namespace OnceTwoTree_game1
                 Bounds.Position -= new Vector2(0,10);
             }
 
+            //Gfroce
             if (!onClimb)
             {
                 Bounds.Position += new Vector2(0, Gfroce) * gameTime.GetElapsedSeconds() * 50;
@@ -190,6 +195,11 @@ namespace OnceTwoTree_game1
             else { wallCheckRight = false; wallCheckLeft = false;  }
         }
 
+
+        public void SetSkillcheckUI()
+        {
+
+        }
         public void SkillCheck()
         {
 
