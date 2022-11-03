@@ -25,7 +25,7 @@ namespace OnceTwoTree_game1
         public static OrthographicCamera _camera;
         public static Vector2 _cameraPosition;
         public static Vector2 _bgPosition;
-
+        public Vector2 _panelPos;
         private readonly List<IEntity> _entities = new List<IEntity>();
         public readonly CollisionComponent _collisionComponent;
         public SpriteFont font;
@@ -37,10 +37,11 @@ namespace OnceTwoTree_game1
         TiledMapObjectLayer _platformTiledObj;
         TiledMapObjectLayer _climbObj;
 
-        bool openConfig = false;
+        bool openConfig = true;
         bool isKeyDown = false;
         
         Vector2 oldPosCam;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -69,6 +70,8 @@ namespace OnceTwoTree_game1
             _tiledMap = Content.Load<TiledMap>("TileManagement\\Platform_TileMap");
             _tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, _tiledMap);
 
+            
+
             //Get Obj layers
             foreach (TiledMapObjectLayer layer in _tiledMap.ObjectLayers)
             {
@@ -81,7 +84,7 @@ namespace OnceTwoTree_game1
             //Get Climb Obj
             foreach(TiledMapObjectLayer layer in _tiledMap.ObjectLayers)
             {
-                if(layer.Name == "ClimbObj")
+                if(layer.Name == "ClimbObject")
                 {
                     _climbObj = layer;
                 }
@@ -102,9 +105,8 @@ namespace OnceTwoTree_game1
             }
 
             //Setup Player
-            _entities.Add(new Player(this, new RectangleF(new Point2(0, MapHeight-108), new Size2(108, 108))));
+            _entities.Add(new Player(this, new RectangleF(new Point2(0, MapHeight-1000), new Size2(108, 138))));
             
-
             foreach(IEntity entity in _entities)
             {
                 _collisionComponent.Insert(entity);
@@ -117,8 +119,11 @@ namespace OnceTwoTree_game1
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            
-            if(!isKeyDown && Keyboard.GetState().IsKeyDown(Keys.NumPad1))
+
+           
+
+            //Open Panel
+            if (!isKeyDown && Keyboard.GetState().IsKeyDown(Keys.NumPad1))
             {
                 isKeyDown = true;
                 if (openConfig)
@@ -158,7 +163,7 @@ namespace OnceTwoTree_game1
             _collisionComponent.Update(gameTime);
             //Start look at
             _camera.LookAt(_bgPosition + _cameraPosition);
-            
+            _panelPos = new Vector2(_cameraPosition.X + Window.ClientBounds.Width-540, _cameraPosition.Y+Window.ClientBounds.Height-270);
             base.Update(gameTime);
         }
 
@@ -177,24 +182,20 @@ namespace OnceTwoTree_game1
                     Player _player1 = (Player)entity;
                     if (openConfig)
                     {
-                        spriteBatch.Draw(block, new Vector2(_cameraPosition.X, _cameraPosition.Y), null, Color.Brown, 0f, Vector2.Zero, new Vector2(4, 2), SpriteEffects.None, 0);
-                        spriteBatch.DrawString(font, "Player Pos = " + _player1.Bounds.Position, new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 10), Color.Black);
-                        spriteBatch.DrawString(font, "Camera Pos = " + _camera.Position, new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 30), Color.Black);
-                        spriteBatch.DrawString(font, "DPos X = " + (_player1.Bounds.Position.X - _cameraPosition.X), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 50), Color.Black);
-                        spriteBatch.DrawString(font, "DPos Y = " + (_player1.Bounds.Position.Y - _cameraPosition.Y), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 70), Color.Black);
-                        //spriteBatch.DrawString(font, "MapWidth = " + (GetMapWidth()), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 90), Color.Black);
-                        //spriteBatch.DrawString(font, "MaxHight = " + (oldPosCam.Y), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 110), Color.Black);
-                        //spriteBatch.DrawString(font, "MaxWidth = " + (oldPosCam.X), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 130), Color.Black);
-                        spriteBatch.DrawString(font, "IsGround = " + (_player1.isGrounded), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 90), Color.Black);
-                        spriteBatch.DrawString(font, "Wall Check = " + (_player1.wallCheck), new Vector2(_cameraPosition.X + 10, _cameraPosition.Y + 110), Color.Black);
+                        spriteBatch.Draw(block, _panelPos, null, Color.Brown, 0f, Vector2.Zero, new Vector2(5, 2.5f), SpriteEffects.None, 0);
+                        spriteBatch.DrawString(font, "Player Pos = " + _player1.Bounds.Position, new Vector2(_panelPos.X + 10, _panelPos.Y + 10), Color.Black);
+                        spriteBatch.DrawString(font, "Camera Pos = " + _camera.Position, new Vector2(_panelPos.X + 10, _panelPos.Y + 30), Color.Black);
+                        spriteBatch.DrawString(font, "DPos X = " + (_player1.Bounds.Position.X - _cameraPosition.X), new Vector2(_panelPos.X + 10, _panelPos.Y + 50), Color.Black);
+                        spriteBatch.DrawString(font, "DPos Y = " + (_player1.Bounds.Position.Y - _cameraPosition.Y), new Vector2(_panelPos.X + 10, _panelPos.Y + 70), Color.Black);
+                        spriteBatch.DrawString(font, "Wall Check R= " + (_player1.wallCheckRight), new Vector2(_panelPos.X + 10, _panelPos.Y + 90), Color.Black);
+                        spriteBatch.DrawString(font, "Wall Check L = " + (_player1.wallCheckLeft), new Vector2(_panelPos.X + 10, _panelPos.Y + 110), Color.Black);
+                        spriteBatch.DrawString(font, "Climb = " + (_player1.onClimb), new Vector2(_panelPos.X + 10, _panelPos.Y + 130), Color.Black);
+                        spriteBatch.DrawString(font, "CountG = " + (_player1.countG), new Vector2(_panelPos.X + 10, _panelPos.Y + 150), Color.Black);
+                        spriteBatch.DrawString(font, "CountW = " + (_player1.countW), new Vector2(_panelPos.X + 10, _panelPos.Y + 170), Color.Black);
                     
                     }
                 }
-                
-
             }
-
-            
 
             spriteBatch.End();
             base.Draw(gameTime);
@@ -209,6 +210,7 @@ namespace OnceTwoTree_game1
             return MapHeight;
         }
 
+        #region Camera
         public void UpdateCameraX(Vector2 move)
         {
             _cameraPosition += move;
@@ -227,6 +229,7 @@ namespace OnceTwoTree_game1
         public float GetCameraPosY()
         {
             return _cameraPosition.Y;
-        }
+        } 
+        #endregion
     }
 }
