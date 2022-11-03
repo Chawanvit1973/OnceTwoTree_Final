@@ -145,7 +145,7 @@
    <object id="18" x="1514" y="3244.5" width="452" height="428"/>
   </objectgroup>
   <objectgroup id="6" name="ClimbObject">
-   <object id="12" x="1501.91" y="3243.95" width="66.6667" height="431.212"/>
+   <object id="12" x="1501.91" y="3244.95" width="66.6667" height="430.212"/>
    <object id="13" x="1072.65" y="3675.98" width="66.6667" height="431.212"/>
    <object id="14" x="2962.67" y="3245.06" width="66.6667" height="431.212"/>
    <object id="15" x="3399.33" y="3677.06" width="66.6667" height="431.212"/>

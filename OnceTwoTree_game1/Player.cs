@@ -162,7 +162,8 @@ namespace OnceTwoTree_game1
             {
                 //Check wall on Right side of Character
                 if (((RectangleF)Bounds).Right >= ((RectangleF)collisionInfo.Other.Bounds).Left &&
-                    ((RectangleF)Bounds).Left < ((RectangleF)collisionInfo.Other.Bounds).Left)
+                    ((RectangleF)Bounds).Left < ((RectangleF)collisionInfo.Other.Bounds).Left &&
+                    ((RectangleF)Bounds).Bottom > ((RectangleF)collisionInfo.Other.Bounds).Top)
                 {
                     countW++;
                     wallCheckRight = true;
@@ -181,8 +182,8 @@ namespace OnceTwoTree_game1
                 else { wallCheckRight = false;}
                 //Check wall on Left side of Character
                 if (((RectangleF)Bounds).Left <= ((RectangleF)collisionInfo.Other.Bounds).Right &&
-                    ((RectangleF)Bounds).Right > ((RectangleF)collisionInfo.Other.Bounds).Right 
-                    )
+                    ((RectangleF)Bounds).Right > ((RectangleF)collisionInfo.Other.Bounds).Right &&
+                    ((RectangleF)Bounds).Bottom > ((RectangleF)collisionInfo.Other.Bounds).Top)
                 {
                     countW++;
                     wallCheckLeft = true;
