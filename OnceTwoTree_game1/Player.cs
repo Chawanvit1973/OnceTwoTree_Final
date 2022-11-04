@@ -336,13 +336,8 @@ namespace OnceTwoTree_game1
             //For test
             if (_currentKey.IsKeyDown(Keys.W) && onClimb == true)
             {
-                Bounds.Position -= new Vector2(0, 10);
-            }
+                Bounds.Position += new Vector2(0, (Gfroce * 2)) * gameTime.GetElapsedSeconds() * 50;
 
-            if (_currentKey.IsKeyDown(Keys.W) && _oldKey.IsKeyUp(Keys.W) && (wallCheckRight == true || wallCheckLeft == true))
-            {
-                if (!onClimb) { onClimb = true; }
-                else if (onClimb) { onClimb = false; }
             }
 
 
