@@ -20,7 +20,7 @@ namespace OnceTwoTree_game1
 
         public IShapeF Bounds { get; }
 
-        protected Texture2D playerTexture;
+        protected Texture2D player1Texture;
         protected Texture2D UI_skillcheck;
         protected Texture2D UI_staminabar;
 
@@ -45,7 +45,7 @@ namespace OnceTwoTree_game1
             _game = game;
             Bounds = circleF;
 
-            playerTexture = _game.Content.Load<Texture2D>("Resources\\Character\\S_player");
+            player1Texture = _game.Content.Load<Texture2D>("Resources\\Character\\S_player");
             UI_skillcheck = _game.Content.Load<Texture2D>("Resources\\UI\\UI_skillcheck");
             UI_staminabar = _game.Content.Load<Texture2D>("Resources\\UI\\UI_stamina");
 
@@ -134,12 +134,12 @@ namespace OnceTwoTree_game1
         {
             if (!isFlip)
             {
-                spriteBatch.Draw(playerTexture, Bounds.Position, new Rectangle(0, 0, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
+                spriteBatch.Draw(player1Texture, Bounds.Position, new Rectangle(0, 0, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
 
             }
             else if (isFlip)
             {
-                spriteBatch.Draw(playerTexture, Bounds.Position, new Rectangle(0, 0, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
+                spriteBatch.Draw(player1Texture, Bounds.Position, new Rectangle(0, 0, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
 
             }
             spriteBatch.DrawRectangle((RectangleF)Bounds, Color.Red, 3f);
