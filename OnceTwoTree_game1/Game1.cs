@@ -16,21 +16,24 @@ namespace OnceTwoTree_game1
 {
     public class Game1 : Game
     {
+        #region Every Var
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
         private const int MapWidth = 4536;
-        private const int MapHeight= 4320;
+        private const int MapHeight = 4320;
 
         public static OrthographicCamera _camera;
         public static Vector2 _cameraPosition;
         public static Vector2 _bgPosition;
         public Vector2 _panelPos;
-        
+
         private readonly List<IEntity> _entities = new List<IEntity>();
         public readonly CollisionComponent _collisionComponent;
         public SpriteFont font;
-        Texture2D block; 
+
+        Texture2D block;
+        Texture2D menu;
 
         TiledMap _tiledMap;
         TiledMapRenderer _tiledMapRenderer;
@@ -40,11 +43,14 @@ namespace OnceTwoTree_game1
 
         bool openConfig = true;
         bool isKeyDown = false;
-        
+
         Vector2 oldPosCam;
 
         Player PlayerPos;
 
+        bool isGameplay;
+        bool isMenu;
+        #endregion
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -72,6 +78,9 @@ namespace OnceTwoTree_game1
             //Load Tilemap
             _tiledMap = Content.Load<TiledMap>("TileManagement\\Platform_TileMap");
             _tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, _tiledMap);
+
+            //Load Menu
+            menu = Content.Load<Texture2D>("Resources\\Title\\TitleScene");
 
             #region find & Create OBJ
             //Getting
@@ -126,100 +135,46 @@ namespace OnceTwoTree_game1
 
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            //Set Scene
+            isMenu = true;
+            isGameplay = false;
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            InGameUpdate(gameTime);
 
-           
-
-            //Open Panel
-            if (!isKeyDown && Keyboard.GetState().IsKeyDown(Keys.NumPad1))
+            if (isMenu == true)
             {
-                isKeyDown = true;
-                if (openConfig)
-                {
-                    openConfig = false;
-
-                }
-                else if (!openConfig)
-                {
-                    openConfig = true;
-
-                }
+                UpdateMenu();
             }
-            else if(Keyboard.GetState().IsKeyUp(Keys.NumPad1) && isKeyDown){ isKeyDown = false; }
-
-            foreach(IEntity entity in _entities)
+            else if (isGameplay == true)
             {
-                entity.Update(gameTime);
-                if (entity.GetType().Name == "Player")
-                {
-                    
-                    if (oldPosCam.Y < entity.Bounds.Position.Y - _cameraPosition.Y)
-                    {
-                        oldPosCam.Y = entity.Bounds.Position.Y - _cameraPosition.Y;
-                    }
-                    if(oldPosCam.X < entity.Bounds.Position.X - _cameraPosition.X)
-                    {
-                        oldPosCam.X = entity.Bounds.Position.X - _cameraPosition.X;
-                    }
-                    
-                }
-
+                UpdateGameplay();
             }
-            
-            _tiledMapRenderer.Update(gameTime);
-            
-            _collisionComponent.Update(gameTime);
-            //follow look at
-            
-            _camera.LookAt(_bgPosition + _cameraPosition);
-            PlayerPos.SetSkillCheckPos(_camera.Position);
-            _panelPos = new Vector2(_camera.Position.X + Window.ClientBounds.Width-540, _camera.Position.Y+Window.ClientBounds.Height-324);
+
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-            var transformMatrix = _camera.GetViewMatrix();
-            _tiledMapRenderer.Draw(transformMatrix);
-            spriteBatch.Begin(transformMatrix: transformMatrix);
 
-            foreach(IEntity entity in _entities)
+            if(isMenu == true)
             {
-                entity.Draw(spriteBatch);
-                if(entity.GetType().Name == "Player")
-                {
-                    Player _player1 = (Player)entity;
-                    if (openConfig)
-                    {
-                        spriteBatch.Draw(block, _panelPos, null, Color.Brown, 0f, Vector2.Zero, new Vector2(5, 3f), SpriteEffects.None, 0);
-                        spriteBatch.DrawString(font, "Player Pos = " + _player1.Bounds.Position, new Vector2(_panelPos.X + 10, _panelPos.Y + 10), Color.Black);
-                        spriteBatch.DrawString(font, "Camera.Pos = " + _camera.Position, new Vector2(_panelPos.X + 10, _panelPos.Y + 30), Color.Black);
-                        spriteBatch.DrawString(font, "CameraPosition = " + _cameraPosition, new Vector2(_panelPos.X + 10, _panelPos.Y + 50), Color.Black);
-                        spriteBatch.DrawString(font, "DPos X = " + (_player1.Bounds.Position.X - _cameraPosition.X), new Vector2(_panelPos.X + 10, _panelPos.Y + 70), Color.Black);
-                        spriteBatch.DrawString(font, "DPos Y = " + (_player1.Bounds.Position.Y - _cameraPosition.Y), new Vector2(_panelPos.X + 10, _panelPos.Y + 90), Color.Black);
-                        spriteBatch.DrawString(font, "Wall Check R= " + (_player1.wallCheckRight), new Vector2(_panelPos.X + 10, _panelPos.Y + 110), Color.Black);
-                        spriteBatch.DrawString(font, "Wall Check L = " + (_player1.wallCheckLeft), new Vector2(_panelPos.X + 10, _panelPos.Y + 130), Color.Black);
-                        spriteBatch.DrawString(font, "Climb = " + (_player1.onClimb), new Vector2(_panelPos.X + 10, _panelPos.Y + 150), Color.Black);
-                        spriteBatch.DrawString(font, "CountG = " + (_player1.countG), new Vector2(_panelPos.X + 10, _panelPos.Y + 170), Color.Black);
-                        spriteBatch.DrawString(font, "CountW = " + (_player1.countW), new Vector2(_panelPos.X + 10, _panelPos.Y + 190), Color.Black);
-                        spriteBatch.DrawString(font, "CountC = " + (_player1.countC), new Vector2(_panelPos.X + 10, _panelPos.Y + 210), Color.Black);
-                        spriteBatch.DrawString(font, "oldCount = " + (_player1.timeCount), new Vector2(_panelPos.X + 10, _panelPos.Y + 230), Color.Black);
-                        spriteBatch.DrawString(font, "DCount = " + (_player1.timeCount-_player1.countG), new Vector2(_panelPos.X + 10, _panelPos.Y + 250), Color.Black);
-                    
-                    }
-   
-                }
+                DrawMenu();
             }
-            spriteBatch.End();
+            if (isGameplay == true)
+            {
+                DrawGameplay();
+            }
+
+            //InGameDraw();
+
             base.Draw(gameTime);
         }
 
+        #region Get Weight,Height
         public int GetMapWidth()
         {
             return MapWidth;
@@ -227,7 +182,8 @@ namespace OnceTwoTree_game1
         public int GetMapHeight()
         {
             return MapHeight;
-        }
+        } 
+        #endregion
 
         #region Camera
         public void UpdateCameraX(Vector2 move)
@@ -263,6 +219,99 @@ namespace OnceTwoTree_game1
         {
             return _camera.Position;
         }
+        #endregion
+
+        public void InGameUpdate(GameTime gameTime)
+        {
+            //Open Panel
+            if (!isKeyDown && Keyboard.GetState().IsKeyDown(Keys.NumPad1))
+            {
+                isKeyDown = true;
+                if (openConfig)
+                {
+                    openConfig = false;
+                }
+                else if (!openConfig)
+                {
+                    openConfig = true;
+                }
+            }
+            else if (Keyboard.GetState().IsKeyUp(Keys.NumPad1) && isKeyDown) { isKeyDown = false; }
+
+            foreach (IEntity entity in _entities)
+            {
+                entity.Update(gameTime);
+            }
+
+            _tiledMapRenderer.Update(gameTime);
+
+            _collisionComponent.Update(gameTime);
+            //follow look at
+
+            _camera.LookAt(_bgPosition + _cameraPosition);
+            PlayerPos.SetSkillCheckPos(_camera.Position);
+            _panelPos = new Vector2(_camera.Position.X + Window.ClientBounds.Width - 540, _camera.Position.Y + Window.ClientBounds.Height - 324);
+        }
+
+        #region Scene Manage
+        public void UpdateMenu()
+        {
+            if (Mouse.GetState().LeftButton == ButtonState.Pressed)
+            {
+                isMenu = false;
+                isGameplay = true;
+            }
+        }
+        public void UpdateGameplay()
+        {
+            if (Mouse.GetState().RightButton == ButtonState.Pressed)
+            {
+                isMenu = true;
+                isGameplay = false;
+            }
+        }
+        public void DrawMenu()
+        {
+            spriteBatch.Begin();
+
+            spriteBatch.Draw(menu, Vector2.Zero, new Rectangle(0, 0, menu.Width / 2, menu.Height), Color.White);
+
+            spriteBatch.End();
+        }
+        public void DrawGameplay()
+        {
+            var transformMatrix = _camera.GetViewMatrix();
+            _tiledMapRenderer.Draw(transformMatrix);
+            spriteBatch.Begin(transformMatrix: transformMatrix);
+
+            foreach (IEntity entity in _entities)
+            {
+                entity.Draw(spriteBatch);
+                if (entity.GetType().Name == "Player")
+                {
+                    Player _player1 = (Player)entity;
+                    if (openConfig)
+                    {
+                        spriteBatch.Draw(block, _panelPos, null, Color.Brown, 0f, Vector2.Zero, new Vector2(5, 3f), SpriteEffects.None, 0);
+                        spriteBatch.DrawString(font, "Player Pos = " + _player1.Bounds.Position, new Vector2(_panelPos.X + 10, _panelPos.Y + 10), Color.Black);
+                        spriteBatch.DrawString(font, "Camera.Pos = " + _camera.Position, new Vector2(_panelPos.X + 10, _panelPos.Y + 30), Color.Black);
+                        spriteBatch.DrawString(font, "CameraPosition = " + _cameraPosition, new Vector2(_panelPos.X + 10, _panelPos.Y + 50), Color.Black);
+                        spriteBatch.DrawString(font, "DPos X = " + (_player1.Bounds.Position.X - _cameraPosition.X), new Vector2(_panelPos.X + 10, _panelPos.Y + 70), Color.Black);
+                        spriteBatch.DrawString(font, "DPos Y = " + (_player1.Bounds.Position.Y - _cameraPosition.Y), new Vector2(_panelPos.X + 10, _panelPos.Y + 90), Color.Black);
+                        spriteBatch.DrawString(font, "Wall Check R= " + (_player1.wallCheckRight), new Vector2(_panelPos.X + 10, _panelPos.Y + 110), Color.Black);
+                        spriteBatch.DrawString(font, "Wall Check L = " + (_player1.wallCheckLeft), new Vector2(_panelPos.X + 10, _panelPos.Y + 130), Color.Black);
+                        spriteBatch.DrawString(font, "Climb = " + (_player1.onClimb), new Vector2(_panelPos.X + 10, _panelPos.Y + 150), Color.Black);
+                        spriteBatch.DrawString(font, "CountG = " + (_player1.countG), new Vector2(_panelPos.X + 10, _panelPos.Y + 170), Color.Black);
+                        spriteBatch.DrawString(font, "CountW = " + (_player1.countW), new Vector2(_panelPos.X + 10, _panelPos.Y + 190), Color.Black);
+                        spriteBatch.DrawString(font, "CountC = " + (_player1.countC), new Vector2(_panelPos.X + 10, _panelPos.Y + 210), Color.Black);
+                        spriteBatch.DrawString(font, "oldCount = " + (_player1.timeCount), new Vector2(_panelPos.X + 10, _panelPos.Y + 230), Color.Black);
+                        spriteBatch.DrawString(font, "DCount = " + (_player1.timeCount - _player1.countG), new Vector2(_panelPos.X + 10, _panelPos.Y + 250), Color.Black);
+
+                    }
+                }
+            }
+            spriteBatch.End();
+        } 
         #endregion
     }
 }
