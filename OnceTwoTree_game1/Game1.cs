@@ -73,8 +73,8 @@ namespace OnceTwoTree_game1
             _tiledMap = Content.Load<TiledMap>("TileManagement\\Platform_TileMap");
             _tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, _tiledMap);
 
-            
-
+            #region find & Create OBJ
+            //Getting
             //Get Obj layers
             foreach (TiledMapObjectLayer layer in _tiledMap.ObjectLayers)
             {
@@ -83,29 +83,30 @@ namespace OnceTwoTree_game1
                     _platformTiledObj = layer;
                 }
             }
-
             //Get Climb Obj
-            foreach(TiledMapObjectLayer layer in _tiledMap.ObjectLayers)
+            foreach (TiledMapObjectLayer layer in _tiledMap.ObjectLayers)
             {
-                if(layer.Name == "ClimbObject")
+                if (layer.Name == "ClimbObject")
                 {
                     _climbObj = layer;
                 }
             }
-
+            
+            //Create
             //Create entities from Map
-            foreach(TiledMapObject obj in _platformTiledObj.Objects)
+            foreach (TiledMapObject obj in _platformTiledObj.Objects)
             {
                 Point2 position = new Point2(obj.Position.X, obj.Position.Y);
                 _entities.Add(new PlatForm(this, new RectangleF(position, obj.Size)));
             }
-
             //Create ClimbObj from Map
             foreach (TiledMapObject obj in _climbObj.Objects)
             {
                 Point2 position = new Point2(obj.Position.X, obj.Position.Y);
                 _entities.Add(new ClimbOBJ(this, new RectangleF(position, obj.Size)));
             }
+            
+            #endregion
 
             //Setup Player
             _entities.Add(new Player(this, new RectangleF(new Point2(276, MapHeight - 600), new Size2(108, 138))));
@@ -119,7 +120,7 @@ namespace OnceTwoTree_game1
                     PlayerPos = (Player)entity;
                 }
             }
-
+            
             //_camera.LookAt(PlayerPos.Bounds.Position + _bgPosition);
             //_camera.LookAt(_bgPosition + _camera.Position);
 
@@ -171,11 +172,13 @@ namespace OnceTwoTree_game1
             }
             
             _tiledMapRenderer.Update(gameTime);
-
+            
             _collisionComponent.Update(gameTime);
             //follow look at
+            
             _camera.LookAt(_bgPosition + _cameraPosition);
-            _panelPos = new Vector2(_camera.Position.X + Window.ClientBounds.Width-540, _camera.Position.Y+Window.ClientBounds.Height-270);
+            PlayerPos.SetSkillCheckPos(_camera.Position);
+            _panelPos = new Vector2(_camera.Position.X + Window.ClientBounds.Width-540, _camera.Position.Y+Window.ClientBounds.Height-324);
             base.Update(gameTime);
         }
 
@@ -194,10 +197,10 @@ namespace OnceTwoTree_game1
                     Player _player1 = (Player)entity;
                     if (openConfig)
                     {
-                        spriteBatch.Draw(block, _panelPos, null, Color.Brown, 0f, Vector2.Zero, new Vector2(5, 2.5f), SpriteEffects.None, 0);
+                        spriteBatch.Draw(block, _panelPos, null, Color.Brown, 0f, Vector2.Zero, new Vector2(5, 3f), SpriteEffects.None, 0);
                         spriteBatch.DrawString(font, "Player Pos = " + _player1.Bounds.Position, new Vector2(_panelPos.X + 10, _panelPos.Y + 10), Color.Black);
-                        spriteBatch.DrawString(font, "Camera Pos = " + _camera.Position, new Vector2(_panelPos.X + 10, _panelPos.Y + 30), Color.Black);
-                        spriteBatch.DrawString(font, "Camera move = " + _cameraPosition, new Vector2(_panelPos.X + 10, _panelPos.Y + 50), Color.Black);
+                        spriteBatch.DrawString(font, "Camera.Pos = " + _camera.Position, new Vector2(_panelPos.X + 10, _panelPos.Y + 30), Color.Black);
+                        spriteBatch.DrawString(font, "CameraPosition = " + _cameraPosition, new Vector2(_panelPos.X + 10, _panelPos.Y + 50), Color.Black);
                         spriteBatch.DrawString(font, "DPos X = " + (_player1.Bounds.Position.X - _cameraPosition.X), new Vector2(_panelPos.X + 10, _panelPos.Y + 70), Color.Black);
                         spriteBatch.DrawString(font, "DPos Y = " + (_player1.Bounds.Position.Y - _cameraPosition.Y), new Vector2(_panelPos.X + 10, _panelPos.Y + 90), Color.Black);
                         spriteBatch.DrawString(font, "Wall Check R= " + (_player1.wallCheckRight), new Vector2(_panelPos.X + 10, _panelPos.Y + 110), Color.Black);
@@ -205,11 +208,14 @@ namespace OnceTwoTree_game1
                         spriteBatch.DrawString(font, "Climb = " + (_player1.onClimb), new Vector2(_panelPos.X + 10, _panelPos.Y + 150), Color.Black);
                         spriteBatch.DrawString(font, "CountG = " + (_player1.countG), new Vector2(_panelPos.X + 10, _panelPos.Y + 170), Color.Black);
                         spriteBatch.DrawString(font, "CountW = " + (_player1.countW), new Vector2(_panelPos.X + 10, _panelPos.Y + 190), Color.Black);
+                        spriteBatch.DrawString(font, "CountC = " + (_player1.countC), new Vector2(_panelPos.X + 10, _panelPos.Y + 210), Color.Black);
+                        spriteBatch.DrawString(font, "oldCount = " + (_player1.timeCount), new Vector2(_panelPos.X + 10, _panelPos.Y + 230), Color.Black);
+                        spriteBatch.DrawString(font, "DCount = " + (_player1.timeCount-_player1.countG), new Vector2(_panelPos.X + 10, _panelPos.Y + 250), Color.Black);
                     
                     }
+   
                 }
             }
-
             spriteBatch.End();
             base.Draw(gameTime);
         }
@@ -242,7 +248,21 @@ namespace OnceTwoTree_game1
         public float GetCameraPosY()
         {
             return _cameraPosition.Y;
-        } 
+        }
+
+        public float GetCameraX()
+        {
+            return _camera.Position.X;
+        }
+        public float GetCameraY()
+        {
+            return _camera.Position.Y;
+        }
+
+        public Vector2 GetCamera()
+        {
+            return _camera.Position;
+        }
         #endregion
     }
 }
