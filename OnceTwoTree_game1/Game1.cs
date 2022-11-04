@@ -43,7 +43,19 @@ namespace OnceTwoTree_game1
         
         Vector2 oldPosCam;
 
-        Player PlayerPos;
+        PlayerOne PlayerOnePos;
+        PlayerTwo PlayerTwoPos;
+
+        #region ViewPort
+
+        Viewport defaultView;
+        Viewport leftView;
+        Viewport rightView;
+
+        Camera cameraOne;
+        Camera cameraTwo;
+
+        #endregion
 
         public Game1()
         {
@@ -108,15 +120,20 @@ namespace OnceTwoTree_game1
             }
 
             //Setup Player
-            _entities.Add(new Player(this, new RectangleF(new Point2(276, MapHeight - 600), new Size2(108, 138))));
+            _entities.Add(new PlayerOne(this, new RectangleF(new Point2(276, MapHeight - 600), new Size2(108, 138))));
+            _entities.Add(new PlayerTwo(this, new RectangleF(new Point2(476, MapHeight - 600), new Size2(108, 138))));
 
             //Start look at
             foreach (IEntity entity in _entities)
             {
                 _collisionComponent.Insert(entity);
-                if(entity.GetType().Name == "Player")
+                if(entity.GetType().Name == "PlayerOne")
                 {
-                    PlayerPos = (Player)entity;
+                    PlayerOnePos = (PlayerOne)entity;
+                }
+                if (entity.GetType().Name == "PlayerTwo")
+                {
+                    PlayerTwoPos = (PlayerTwo)entity;
                 }
             }
 
@@ -125,6 +142,16 @@ namespace OnceTwoTree_game1
 
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            //ViewPort
+            defaultView = GraphicsDevice.Viewport;
+            leftView = defaultView;
+            rightView = defaultView;
+            leftView.Width = leftView.Width / 2;
+            rightView.Width = rightView.Width / 2;
+            rightView.X = leftView.Width;
+
+            cameraOne = new Camera();
+            cameraTwo = new Camera();
         }
 
         protected override void Update(GameTime gameTime)
@@ -176,6 +203,11 @@ namespace OnceTwoTree_game1
             //follow look at
             _camera.LookAt(_bgPosition + _cameraPosition);
             _panelPos = new Vector2(_camera.Position.X + Window.ClientBounds.Width-540, _camera.Position.Y+Window.ClientBounds.Height-270);
+
+            //update camera viewport
+            cameraOne.Update(PlayerOnePos.Bounds.Position);
+            cameraTwo.Update(PlayerTwoPos.Bounds.Position);
+
             base.Update(gameTime);
         }
 
@@ -191,7 +223,7 @@ namespace OnceTwoTree_game1
                 entity.Draw(spriteBatch);
                 if(entity.GetType().Name == "Player")
                 {
-                    Player _player1 = (Player)entity;
+                    PlayerOne _player1 = (PlayerOne)entity;
                     if (openConfig)
                     {
                         spriteBatch.Draw(block, _panelPos, null, Color.Brown, 0f, Vector2.Zero, new Vector2(5, 2.5f), SpriteEffects.None, 0);
@@ -211,6 +243,15 @@ namespace OnceTwoTree_game1
             }
 
             spriteBatch.End();
+
+            GraphicsDevice.Viewport = leftView;
+            DrawSprites(cameraOne);
+
+            GraphicsDevice.Viewport = rightView;
+            DrawSprites(cameraTwo);
+
+            GraphicsDevice.Viewport = defaultView;
+
             base.Draw(gameTime);
         }
 
@@ -223,26 +264,59 @@ namespace OnceTwoTree_game1
             return MapHeight;
         }
 
-        #region Camera
-        public void UpdateCameraX(Vector2 move)
+        #region Camera One
+        public void UpdateCameraXOne(Vector2 move)
         {
             _cameraPosition += move;
         }
 
-        public void UpdateCameraY(Vector2 move)
+        public void UpdateCameraYOne(Vector2 move)
         {
             _cameraPosition -= move;
         }
 
-        public float GetCameraPosX()
+        public float GetCameraPosXOne()
         {
             return _cameraPosition.X;
         }
 
-        public float GetCameraPosY()
+        public float GetCameraPosYOne()
         {
             return _cameraPosition.Y;
-        } 
+        }
         #endregion
+
+        #region Camera Two
+        public void UpdateCameraXTwo(Vector2 move)
+        {
+            _cameraPosition += move;
+        }
+
+        public void UpdateCameraYTwo(Vector2 move)
+        {
+            _cameraPosition -= move;
+        }
+
+        public float GetCameraPosXTwo()
+        {
+            return _cameraPosition.X;
+        }
+
+        public float GetCameraPosYTwo()
+        {
+            return _cameraPosition.Y;
+        }
+        #endregion
+
+        void DrawSprites(Camera camera)
+        {
+            spriteBatch.Begin(SpriteSortMode.Deferred,
+                BlendState.AlphaBlend,
+                null, null, null, null,
+                camera.Tranform);
+            PlayerOnePos.Draw(spriteBatch);
+            PlayerTwoPos.Draw(spriteBatch);
+            spriteBatch.End();
+        }
     }
 }
