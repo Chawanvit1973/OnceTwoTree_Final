@@ -334,16 +334,7 @@ namespace OnceTwoTree_game1
                 _game.UpdateCameraY(move);
             }
             //For test
-            if (_currentKey.IsKeyDown(Keys.W) && onClimb == true)
-            {
-                Bounds.Position -= new Vector2(0, 10);
-            }
-
-            if (_currentKey.IsKeyDown(Keys.W) && _oldKey.IsKeyUp(Keys.W) && (wallCheckRight == true || wallCheckLeft == true))
-            {
-                if (!onClimb) { onClimb = true; }
-                else if (onClimb) { onClimb = false; }
-            }
+            
 
 
             if (_currentKey.IsKeyDown(Keys.D1))
