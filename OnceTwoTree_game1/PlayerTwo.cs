@@ -11,7 +11,7 @@ using MonoGame.Extended.Collisions;
 
 namespace OnceTwoTree_game1
 {
-    public class Player : IEntity
+    public class PlayerTwo : IEntity
     {
         private readonly Game1 _game;
 
@@ -20,7 +20,7 @@ namespace OnceTwoTree_game1
 
         public IShapeF Bounds { get; }
 
-        protected Texture2D playerTexture;
+        protected Texture2D P_idle, P_climb, P_walk, P_fall;
         protected Texture2D UI_stamina;
         protected Texture2D UI_bar;
         protected Texture2D UI_insidebar;
@@ -34,28 +34,37 @@ namespace OnceTwoTree_game1
         //time Count
         float totalElapsed;
         float timePerFrame;
-
+        #region Player Animate var
+        public float p_timePerframe;
+        float p_totalElapsed;
+        int p_frame;
+        public int p_stateNum;
+        int p_climbFrame;
+        #endregion
         #region StaminaVar
-        float tiredZone = 25;
+        float tiredZone;
+        float staminaCost;
         public float energy;
         public float maxEnergy;
         public float energyBar;
-        public float maxEnergyBar; 
-        #endregion
-
+        public float maxEnergyBar;
         float totalTime;
         float maxTime;
+        #endregion
+
+
 
         internal HookBox myhook;
 
 
         public int Gfroce = 10;
 
-        public int timeCount = 0;
-        public int countG = 0;
+        public float timeCount = 0;
+        public float countG = 0;
         public int countW = 0;
         public int countC = 0;
-        
+
+        public bool onAir;
         public bool isFlip;
         public bool wallCheckLeft, wallCheckRight;
         public bool onClimb;
@@ -74,61 +83,70 @@ namespace OnceTwoTree_game1
         Rectangle triggerRec, barRec, dropRec, scLRec, scRRec;
 
         #region SkillCheck var & Staminabar
-        public Vector2 barPos, leftHandPos, rightHandPos,triggerPos,insideBarPos,dropBarPos,checkBarPosL,checkBarPosR;
+        public Vector2 barPos, leftHandPos, rightHandPos, triggerPos, insideBarPos, dropBarPos, checkBarPosL, checkBarPosR;
         public Vector2 dropBarScale, checkBarScaleL, checkBarScaleR;
-        public Vector2 staminaPos,energyPos;
+        public Vector2 staminaPos, energyPos;
         #endregion
-        
+
         //public CollisionEventArgs _currentBlock;
-        public Player(Game1 game,IShapeF circleF)
+        public PlayerTwo(Game1 game, IShapeF circleF)
         {
             _game = game;
             Bounds = circleF;
 
-            playerTexture = _game.Content.Load<Texture2D>("Resources\\Character\\S_player");
+            P_idle = _game.Content.Load<Texture2D>("Resources\\Character\\P_idle");
+            P_climb = _game.Content.Load<Texture2D>("Resources\\Character\\P_climb");
+            P_fall = _game.Content.Load<Texture2D>("Resources\\Character\\P_fall");
+            P_walk = _game.Content.Load<Texture2D>("Resources\\Character\\P_walk");
+
             UI_stamina = _game.Content.Load<Texture2D>("Resources\\UI\\UI_stamina");
             UI_bar = _game.Content.Load<Texture2D>("Resources\\UI\\UI_bar");
             UI_insidebar = _game.Content.Load<Texture2D>("Resources\\UI\\UI_insidebar");
             UI_hand = _game.Content.Load<Texture2D>("Resources\\UI\\UI_hand");
             UI_check = _game.Content.Load<Texture2D>("Resources\\UI\\UI_skillcheck_trigger");
-            UI_popup = _game.Content.Load<Texture2D>("Resources\\UI\\UI_Popup");
+            UI_popup = _game.Content.Load<Texture2D>("Resources\\UI\\UI_popup2");
             UI_energy = _game.Content.Load<Texture2D>("Resources\\UI\\UI_energy");
-            
+
             totalElapsed = 0;
-            timePerFrame = 1;
+            timePerFrame = 0.025f;
             //energy config
             totalTime = 0;
             maxTime = 0.5f;
             maxEnergy = 100;
             energy = maxEnergy;
-            
-
+            tiredZone = 15;
+            staminaCost = 5;
+            energyBar = UI_energy.Height;
+            maxEnergyBar = UI_energy.Height;
+            //Player Animate
+            p_stateNum = 0;
+            p_totalElapsed = 0;
+            p_timePerframe = 1;
+            p_frame = 0;
+            p_climbFrame = 0;
+            //Basic Setting
             wallCheckLeft = wallCheckRight = false;
             isFlip = false;
             leftHand = false;
-
-            energyBar = UI_energy.Height;
-            maxEnergyBar = UI_energy.Height;
+            onAir = false;
 
 
-            HookBox.LoadHookToPlayer(this, this._game);
-           
+
+            //HookBox.LoadHookToPlayer(this, this._game);
+
         }
 
-        
+
         public virtual void Update(GameTime gameTime)
         {
             PlayerControl(gameTime);
 
             //Rectangle
             triggerRec = new Rectangle((int)triggerPos.X, (int)triggerPos.Y, (int)(UI_check.Width / 3), (int)(UI_check.Height));
-            barRec = new Rectangle((int)insideBarPos.X, (int)insideBarPos.Y, (int)(UI_insidebar.Width), (int)(UI_insidebar.Height/3));
+            barRec = new Rectangle((int)insideBarPos.X, (int)insideBarPos.Y, (int)(UI_insidebar.Width), (int)(UI_insidebar.Height / 3));
             dropRec = new Rectangle((int)dropBarPos.X, (int)dropBarPos.Y, (int)(UI_check.Width / 3 * dropBarScale.X), (int)(UI_check.Height * dropBarScale.Y));
-            scLRec = new Rectangle((int)checkBarPosL.X, (int)checkBarPosL.Y, (int)(UI_check.Width/3 * checkBarScaleL.X), (int)(UI_check.Height * checkBarScaleL.Y));
+            scLRec = new Rectangle((int)checkBarPosL.X, (int)checkBarPosL.Y, (int)(UI_check.Width / 3 * checkBarScaleL.X), (int)(UI_check.Height * checkBarScaleL.Y));
             scRRec = new Rectangle((int)checkBarPosR.X, (int)checkBarPosR.Y, (int)(UI_check.Width / 3 * checkBarScaleR.X), (int)(UI_check.Height * checkBarScaleR.Y));
-
-            //CoreGame
-            //SkillCheck(gameTime,barRec,triggerRec);
 
             //Gfroce
             if (onClimb == false)
@@ -136,7 +154,6 @@ namespace OnceTwoTree_game1
                 Bounds.Position += new Vector2(0, (Gfroce * 2)) * gameTime.GetElapsedSeconds() * 50;
 
             }
-
             //Check out of wall
             if (wallCheckRight == false && wallCheckLeft == false)
             {
@@ -145,64 +162,128 @@ namespace OnceTwoTree_game1
 
             //Time Count
             TimeCount((float)gameTime.ElapsedGameTime.TotalSeconds);
-            if (timeCount - countG >= 0)
+            if (timeCount - countG >= 1f)
+            {
+                onAir = true;
+            }
+            else { onAir = false; }
+
+
+            if (onAir)
             {
                 if (wallCheckLeft) { wallCheckLeft = false; }
                 if (wallCheckRight) { wallCheckRight = false; }
-
+                p_stateNum = 3;
             }
+
             //Debug
             if (countW > 10) { countW = 0; }
             if (countC > 10) { countC = 0; }
 
             //Energy
             StaminaSystem((float)gameTime.ElapsedGameTime.TotalSeconds);
-            energyBar = maxEnergyBar - (((energy / maxEnergy)) * maxEnergyBar );
-            if(energyBar > maxEnergyBar)
+            energyBar = maxEnergyBar - (((energy / maxEnergy)) * maxEnergyBar);
+            if (energyBar > maxEnergyBar)
             {
                 energyBar = maxEnergyBar;
             }
-        
 
-            //hook
-            myhook.Update(gameTime);
-            
+            //Animate
+            switch (p_stateNum)
+            {
+                case 0:
+                    {
+                        p_timePerframe = 0.5f;
+                        break;
+                    }
+                case 1:
+                    {
+                        p_timePerframe = 0.1f;
+                        break;
+                    }
+            }
+            UpdateFrame((float)gameTime.ElapsedGameTime.TotalSeconds);
+
+
         }
 
         public virtual void Draw(SpriteBatch spriteBatch)
         {
             if (!isFlip)
             {
-                spriteBatch.Draw(playerTexture, Bounds.Position, new Rectangle(0, 0, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
+                switch (p_stateNum)
+                {
+                    case 0:
+                        {
+                            spriteBatch.Draw(P_idle, Bounds.Position, new Rectangle(108 * p_frame, P_idle.Height/2 + 5, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
+                            break;
+                        }
+                    case 1:
+                        {
+                            spriteBatch.Draw(P_walk, Bounds.Position, new Rectangle(108 * p_frame, P_walk.Height/2 + 5, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
+                            break;
+                        }
+                    case 2:
+                        {
+                            spriteBatch.Draw(P_climb, Bounds.Position, new Rectangle(108 * p_climbFrame,P_climb.Height/2+5, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
+                            break;
+                        }
+                    case 3:
+                        {
+                            spriteBatch.Draw(P_fall, Bounds.Position, new Rectangle(P_fall.Width/2, 0, 144, 108), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
+                            break;
+                        }
+                }
 
             }
             else if (isFlip)
             {
-                spriteBatch.Draw(playerTexture, Bounds.Position, new Rectangle(0, 0, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
+                switch (p_stateNum)
+                {
+                    case 0:
+                        {
+                            spriteBatch.Draw(P_idle, Bounds.Position, new Rectangle(108 * p_frame, P_idle.Height / 2 +5, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
+                            break;
+                        }
+                    case 1:
+                        {
+                            spriteBatch.Draw(P_walk, Bounds.Position, new Rectangle(108 * p_frame, (P_walk.Height / 2)+5 , 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
+                            break;
+                        }
+                    case 2:
+                        {
+                            spriteBatch.Draw(P_climb, Bounds.Position, new Rectangle(108 * p_climbFrame, P_climb.Height / 2 +5 , 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
+                            break;
+                        }
+                    case 3:
+                        {
+                            spriteBatch.Draw(P_fall, Bounds.Position, new Rectangle(P_fall.Width / 2 , 0, 144, 108), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
+                            break;
+                        }
+                }
 
             }
+
             //Draw InteractPopUp
-            if((wallCheckLeft || wallCheckRight) && !onClimb)
+            if ((wallCheckLeft || wallCheckRight) && !onClimb)
             {
-                spriteBatch.Draw(UI_popup, new Vector2(((RectangleF)Bounds).Position.X+(((RectangleF)Bounds).Size.Width/2-UI_popup.Width/4), ((RectangleF)Bounds).Top - UI_popup.Height), 
-                                           new Rectangle(framePopup*UI_popup.Width, 0, UI_popup.Width/2, UI_popup.Height), Color.White);
+                spriteBatch.Draw(UI_popup, new Vector2(((RectangleF)Bounds).Position.X + (((RectangleF)Bounds).Size.Width / 2 - UI_popup.Width / 4), ((RectangleF)Bounds).Top - UI_popup.Height),
+                                           new Rectangle(framePopup * UI_popup.Width, 0, UI_popup.Width / 2, UI_popup.Height), Color.White);
             }
             DrawSkilCheck(spriteBatch);
             spriteBatch.DrawRectangle((RectangleF)Bounds, Color.Red, 3f);
-
-            //HookDraw
-            this.myhook.Draw(spriteBatch);
+            
         }
-       
+
         public void OnCollision(CollisionEventArgs collisionInfo)
         {
             countC++;
             //Platform Collision
             if (collisionInfo.Other.ToString().Contains("PlatForm"))
             {
+                countG = timeCount;
                 if (!onClimb)
                 {
-                    countG = timeCount;
                     Bounds.Position -= collisionInfo.PenetrationVector;
                 }
 
@@ -217,7 +298,7 @@ namespace OnceTwoTree_game1
                     ((RectangleF)Bounds).Bottom - 10 >= ((RectangleF)collisionInfo.Other.Bounds).Top &&
                     ((RectangleF)Bounds).Bottom - 10 <= ((RectangleF)collisionInfo.Other.Bounds).Bottom)
                 {
-                    
+
                     wallCheckRight = true;
                     if (onClimb)
                     {
@@ -256,7 +337,7 @@ namespace OnceTwoTree_game1
                 }
                 else { wallCheckLeft = false; }
             }
-            else { wallCheckRight = false; wallCheckLeft = false; } 
+            else { wallCheckRight = false; wallCheckLeft = false; }
             #endregion
 
         }
@@ -264,120 +345,160 @@ namespace OnceTwoTree_game1
         public void TimeCount(float elapsed)
         {
             totalElapsed += elapsed;
-            if(totalElapsed > timePerFrame)
+            if (totalElapsed > timePerFrame)
             {
-                timeCount = timeCount + 1;
+                timeCount = timeCount + 0.5f;
                 totalElapsed -= timePerFrame;
             }
 
         }
 
+        public void UpdateFrame(float elapsed)
+        {
+            p_totalElapsed += elapsed;
+            if (p_totalElapsed > p_timePerframe)
+            {
+                switch (p_stateNum)
+                {
+                    case 0:
+                        {
+                            if (p_totalElapsed > p_timePerframe)
+                            {
+                                p_frame = (p_frame + 1) % 4;
+                            }
+                            p_totalElapsed -= p_timePerframe;
+                            break;
+                        }
+                    case 1:
+                        {
+                            if (p_totalElapsed > p_timePerframe)
+                            {
+                                p_frame = (p_frame + 1) % 4;
+                            }
+
+                            p_totalElapsed -= p_timePerframe;
+                            break;
+                        }
+                }
+            }
+        }
         #region PlayerControl
         public void PlayerControl(GameTime gameTime)
         {
             _currentKey = Keyboard.GetState();
 
             //framePopup = (framePopup+1) % 2;
-            #region A D (Left Right)
+            #region < > (Left Right)
             if (onClimb == true)
             {
-                if (_currentKey.IsKeyDown(Keys.A) && _oldKey.IsKeyUp(Keys.A))
+                p_stateNum = 2;
+                if (_currentKey.IsKeyDown(Keys.Left) && _oldKey.IsKeyUp(Keys.Left))
                 {
-                    if (leftHand == true && triggerRec.Intersects(scLRec) && energy / maxEnergy * 100 > tiredZone )
+                    if (leftHand == true && triggerRec.Intersects(scLRec) && energy / maxEnergy * 100 > tiredZone)
                     {
-                        energy -= 10;
+                        energy -= staminaCost;
                         leftHand = false;
+                        if (p_climbFrame == 0) { p_climbFrame = 1; }
+                        else if (p_climbFrame == 1) { p_climbFrame = 0; }
                         move = new Vector2(0, Velocity) * gameTime.GetElapsedSeconds() * 100;
-                        if (_game.GetCameraPosY() - Bounds.Position.Y <= 864)
+                        if (_game.GetCameraPos2Y() - Bounds.Position.Y <= 864)
                         {
-                            _game.UpdateCameraY(move);
+                            _game.UpdateCamera2Y(move);
                         }
                         Bounds.Position -= move;
                     }
                     if (triggerRec.Intersects(dropRec))
                     {
-                        energy -= 10;
+                        energy -= staminaCost;
                         move = new Vector2(0, -Velocity) * gameTime.GetElapsedSeconds() * 100;
-                        if (_game.GetCameraPosY() - Bounds.Position.Y <= 864)
+                        if (_game.GetCameraPos2Y() - Bounds.Position.Y <= 864)
                         {
-                            _game.UpdateCameraY(move);
+                            _game.UpdateCamera2Y(move);
                         }
                         Bounds.Position -= move;
                     }
                 }
-                else if (_currentKey.IsKeyDown(Keys.D) && _oldKey.IsKeyUp(Keys.D))
+                else if (_currentKey.IsKeyDown(Keys.Right) && _oldKey.IsKeyUp(Keys.Right))
                 {
                     if (leftHand == false && triggerRec.Intersects(scRRec) && energy / maxEnergy * 100 > tiredZone)
                     {
-                        energy -= 10;
+                        energy -= staminaCost;
                         leftHand = true;
+                        if (p_climbFrame == 0) { p_climbFrame = 1; }
+                        else if (p_climbFrame == 1) { p_climbFrame = 0; }
                         move = new Vector2(0, Velocity) * gameTime.GetElapsedSeconds() * 100;
-                        if (_game.GetCameraPosY() - Bounds.Position.Y <= 864)
+                        if (_game.GetCameraPos2Y() - Bounds.Position.Y <= 864)
                         {
-                            _game.UpdateCameraY(move);
+                            _game.UpdateCamera2Y(move);
                         }
                         Bounds.Position -= move;
                     }
                     if (triggerRec.Intersects(dropRec))
                     {
-                        energy -= 10;
+                        energy -= staminaCost;
                         move = new Vector2(0, -Velocity) * gameTime.GetElapsedSeconds() * 100;
-                        if (_game.GetCameraPosY() - Bounds.Position.Y <= 864)
+                        if (_game.GetCameraPos2Y() - Bounds.Position.Y <= 864)
                         {
-                            _game.UpdateCameraY(move);
+                            _game.UpdateCamera2Y(move);
                         }
                         Bounds.Position -= move;
                     }
                 }
             }
-            else if (onClimb == false)
+            else if (onClimb == false && onAir == false)
             {
-                if (_currentKey.IsKeyDown(Keys.D) && Bounds.Position.X < _game.GetMapWidth() - ((RectangleF)Bounds).Width)
+                if (_currentKey.IsKeyDown(Keys.Right) && Bounds.Position.X < _game.GetMapWidth() - ((RectangleF)Bounds).Width)
                 {
+                    p_stateNum = 1;
                     isFlip = false;
                     move = new Vector2(Velocity, 0) * gameTime.GetElapsedSeconds() * 50;
-                    if (Bounds.Position.X - _game.GetCameraPosX() >= 400
-                        && _game.GetCameraPosX() < _game.GetMapWidth() - 1728)
+                    if (Bounds.Position.X - _game.GetCameraPos2X() >= 300
+                        && _game.GetCameraPos2X() < _game.GetMapWidth() - 1728)
                     {
-                        _game.UpdateCameraX(move);
+                        _game.UpdateCamera2X(move);
                     }
                     Bounds.Position += move;
                 }
-                else if (_currentKey.IsKeyDown(Keys.A) && Bounds.Position.X > 0)
+                else if (_currentKey.IsKeyDown(Keys.Left) && Bounds.Position.X > 0)
                 {
+                    p_stateNum = 1;
                     isFlip = true;
                     move = new Vector2(-Velocity, 0) * gameTime.GetElapsedSeconds() * 50;
-                    if (Bounds.Position.X - _game.GetCameraPosX() <= 300
-                        && _game.GetCameraPosX() > 0)
+                    if (Bounds.Position.X - _game.GetCameraPos2X() <= 400
+                        && _game.GetCameraPos2X() > 0)
                     {
-                        _game.UpdateCameraX(move);
+                        _game.UpdateCamera2X(move);
                     }
                     Bounds.Position += move;
+                }
+                else if (_currentKey.IsKeyUp(Keys.Left) && _currentKey.IsKeyUp(Keys.Right))
+                {
+                    p_stateNum = 0;
                 }
             }
             #endregion
             //For camera
-            if (_currentKey.IsKeyDown(Keys.W) && onClimb == true)
+            if (_currentKey.IsKeyDown(Keys.Up) && onClimb == true)
             {
                 move = new Vector2(0, 10) * gameTime.GetElapsedSeconds() * 60;
-                if (_game.GetCameraPosY() - Bounds.Position.Y <= 864)
+                if (_game.GetCameraPos2Y() - Bounds.Position.Y <= 864)
                 {
-                    _game.UpdateCameraY(move);
+                    _game.UpdateCamera2Y(move);
                 }
 
             }
-            else if (Bounds.Position.Y + 108 - _game.GetCameraPosY() >= (_game.GetMapHeight() - 216))
+            else if (Bounds.Position.Y + 108 - _game.GetCameraPos2Y() >= (_game.GetMapHeight() - 216))
             {
                 move = new Vector2(0, (-Gfroce * 2)) * gameTime.GetElapsedSeconds() * 50;
-                _game.UpdateCameraY(move);
+                _game.UpdateCamera2Y(move);
             }
             //For test
-            if (_currentKey.IsKeyDown(Keys.W) && onClimb == true)
+            if (_currentKey.IsKeyDown(Keys.Up) && onClimb == true)
             {
                 Bounds.Position -= new Vector2(0, 10);
             }
 
-            if (_currentKey.IsKeyDown(Keys.W) && _oldKey.IsKeyUp(Keys.W) && (wallCheckRight == true || wallCheckLeft == true))
+            if (_currentKey.IsKeyDown(Keys.Up) && _oldKey.IsKeyUp(Keys.Up) && (wallCheckRight == true || wallCheckLeft == true))
             {
                 if (!onClimb) { onClimb = true; }
                 else if (onClimb) { onClimb = false; }
@@ -385,44 +506,44 @@ namespace OnceTwoTree_game1
 
 
 
-            if (_currentKey.IsKeyDown(Keys.D1))
+            if (_currentKey.IsKeyDown(Keys.NumPad3))
             {
                 Bounds.Position -= new Vector2(0, 20);
             }
 
             _oldKey = _currentKey;
-        } 
+        }
         #endregion
 
         #region SkillCheck
         public void SetSkillCheckPos(Vector2 target)
         {
             //LeftHand
-            leftHandPos = new Vector2(target.X + 9,target.Y +27);
+            leftHandPos = new Vector2(target.X + _game.Window.ClientBounds.Width - 9, target.Y - 27);
             //Bar
-            barPos = new Vector2(leftHandPos.X+(UI_hand.Width/2), leftHandPos.Y);
+            barPos = new Vector2(leftHandPos.X + (UI_hand.Width / 2), leftHandPos.Y);
             //Righthand
             rightHandPos = new Vector2(barPos.X + UI_bar.Width, barPos.Y);
             //InsideBar
             insideBarPos = new Vector2(barPos.X + 18, barPos.Y + 18);
             //DropCheck
             dropBarScale = new Vector2(2, 1);
-            dropBarPos = new Vector2(insideBarPos.X+UI_insidebar.Width/2-(((UI_check.Width/3)*dropBarScale.X)/2), insideBarPos.Y + 4.6f);
+            dropBarPos = new Vector2(insideBarPos.X + UI_insidebar.Width / 2 - (((UI_check.Width / 3) * dropBarScale.X) / 2), insideBarPos.Y + 4.6f);
             //LeftCheck
             checkBarScaleL = new Vector2(2, 1);
-            checkBarPosL = new Vector2(insideBarPos.X +4.6f, insideBarPos.Y + 4.6f);
+            checkBarPosL = new Vector2(insideBarPos.X + 4.6f, insideBarPos.Y + 4.6f);
             //RightChek
             checkBarScaleR = new Vector2(2, 1);
-            checkBarPosR = new Vector2(insideBarPos.X + UI_insidebar.Width - (UI_check.Width / 3 * checkBarScaleR.X)  - 4.6f, insideBarPos.Y + 4.6f);
+            checkBarPosR = new Vector2(insideBarPos.X + UI_insidebar.Width - (UI_check.Width / 3 * checkBarScaleR.X) - 4.6f, insideBarPos.Y + 4.6f);
             //Stamina
-            staminaPos = new Vector2(target.X + 9, target.Y + 486 - UI_stamina.Height / 2);
-            energyPos = new Vector2(target.X + 32.5f, (target.Y + 486 - UI_stamina.Height / 2)+23.5f);
+            staminaPos = new Vector2(target.X + 1728- 9, target.Y + 486 - UI_stamina.Height / 2);
+            energyPos = new Vector2(target.X + 1728 - 32.5f, (target.Y + 486 - UI_stamina.Height / 2) + 23.5f);
         }
 
         public void DrawSkilCheck(SpriteBatch spriteBatch)
         {
             //LeftHand
-            spriteBatch.Draw(UI_hand, leftHandPos, new Rectangle(UI_hand.Width/2 * leftHandOn, UI_hand.Height/2 * leftHandStage, UI_hand.Width/2, UI_hand.Height/2), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
+            spriteBatch.Draw(UI_hand, leftHandPos, new Rectangle(UI_hand.Width / 2 * leftHandOn, UI_hand.Height / 2 * leftHandStage, UI_hand.Width / 2, UI_hand.Height / 2), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
             //RightHand
             spriteBatch.Draw(UI_hand, rightHandPos, new Rectangle(UI_hand.Width / 2 * rightHandOn, UI_hand.Height / 2 * rightHandStage, UI_hand.Width / 2, UI_hand.Height / 2), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
             //Bar
@@ -440,7 +561,7 @@ namespace OnceTwoTree_game1
             }
             //Stamina
             spriteBatch.Draw(UI_stamina, staminaPos, new Rectangle(0, 0, UI_stamina.Width, UI_stamina.Height), Color.White);
-            spriteBatch.Draw(UI_energy,new Rectangle((int)energyPos.X,(int)energyPos.Y,UI_energy.Width,(int)energyBar), new Rectangle(0, 0, UI_energy.Width, UI_energy.Height),Color.White);
+            spriteBatch.Draw(UI_energy, new Rectangle((int)energyPos.X, (int)energyPos.Y, UI_energy.Width, (int)energyBar), new Rectangle(0, 0, UI_energy.Width, UI_energy.Height), Color.White);
             //Web Status
             //spriteBatch.Draw(UI_bar, barPos, new Rectangle(0, UI_bar.Height/2, UI_bar.Width, UI_bar.Height / 2), Color.White);
             //Inside
@@ -487,9 +608,9 @@ namespace OnceTwoTree_game1
                     leftHandStage = 1;
                     rightHandStage = 0;
                 }
-                
+
                 //Hand ON Set
-                if( leftHand == true && triggerRec.Intersects(scLRec) && energy / maxEnergy * 100 > tiredZone)
+                if (leftHand == true && triggerRec.Intersects(scLRec) && energy / maxEnergy * 100 > tiredZone)
                 {
                     leftHandOn = 1;
                 }
@@ -521,21 +642,23 @@ namespace OnceTwoTree_game1
                 energy = energy + 2.5f;
                 totalTime -= maxTime;
             }
-
             if (energy > maxEnergy)
             {
-                energy--;
-            } 
-            else if (energy/maxEnergy * 100 > 50)
+                energy = maxEnergy;
+            }
+            else if (energy / maxEnergy * 100 > 50)
             {
+                p_timePerframe = 0.5f;
                 maxTime = 0.5f;
             }
             else if (energy / maxEnergy * 100 < 50)
             {
+                p_timePerframe = 0.25f;
                 maxTime = 0.8f;
             }
             else if (energy / maxEnergy * 100 < tiredZone)
             {
+                p_timePerframe = 0.1f;
                 maxTime = 2f;
             }
             else if (energy <= 0)
@@ -547,180 +670,6 @@ namespace OnceTwoTree_game1
         #endregion
     }
 
-    internal class HookBox : IEntity
-    {
-
-        private readonly Game1 _game;
-
-        public IShapeF Bounds { get; }
-
-        Texture2D _RopeTexture; // รอimportรูปเชือก
-        Texture2D _RopeTexture_Test;
-
-        bool _ishooking = false;
-        public double _myTime = 0.0;
-
-        Player myPlayer;
-
-        static List<Player> _PlayerControl = new List<Player>();
-        public static List<HookBox> _Hookboxes = new List<HookBox>();
-
-        CollisionComponent _myBox;
 
 
-        internal HookBox(Game1 game, IShapeF myShape)
-        {
-            this._game = game;
-            Bounds = myShape;
-
-            //สำหรับ Test
-            _RopeTexture_Test = new Texture2D(game.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-            _RopeTexture_Test.SetData(new[] { Color.Aqua });
-
-            //สำหรับ Load Texture เชือก
-            //_RopeTexture = _game.Content.Load<Texture2D>();
-
-        }
-
-
-        public static void LoadHookToPlayer(Player _mPlayer, Game1 game)
-        {
-            _PlayerControl.Add(_mPlayer);
-            _Hookboxes.Add(new HookBox(game, new RectangleF(Point2.Zero, new Size2(108, 108))));
-            _mPlayer.myhook = _Hookboxes[_Hookboxes.Count-1];
-        }
-
-        public enum throwing_state { throwing, startthrow, finalthrow, idle }
-
-        public throwing_state throw_state = throwing_state.idle;
-
-        KeyboardState _oldkey;
-        public virtual void Update(GameTime gameTime)
-        {
-            KeyboardState keyboard = Keyboard.GetState();
-
-            #region ThrowingPlayer1
-            if ((keyboard.IsKeyDown(Keys.E) && (_Hookboxes[0].throw_state == throwing_state.idle)) || _Hookboxes[0].throw_state == throwing_state.startthrow) // สำหรับ player 1 แม้จะมี player แค่คนเดียว
-            {
-                if (_Hookboxes[0].throw_state != throwing_state.throwing)
-                {
-                    //อาจจะ set Animate ไว้ตรงนี้ก็ได้
-                }
-
-                if (_oldkey.IsKeyUp(Keys.E) && (_Hookboxes[0].throw_state == throwing_state.idle))
-                {
-                    myPlayer = _PlayerControl[0];
-                    _Hookboxes[0].throw_state = throwing_state.startthrow;
-                    _Hookboxes[0].ThrowHook(gameTime);
-                }
-
-                else if (_Hookboxes[0].throw_state == throwing_state.startthrow)
-                {
-                    _Hookboxes[0].throw_state = throwing_state.throwing;
-                    _Hookboxes[0].ThrowHook(gameTime);
-                }
-                
-            }
-
-            else if (_Hookboxes[0].throw_state == throwing_state.throwing)
-            {
-                _Hookboxes[0].ThrowHook(gameTime);
-            }
-
-            else if (_Hookboxes[0].throw_state == throwing_state.finalthrow)
-            {
-                _Hookboxes[0].ThrowHook(gameTime);
-                throw_state = throwing_state.idle;
-            }
-            #endregion
-                        
-            _oldkey = keyboard;
-        }
-                
-
-        public virtual void Draw(SpriteBatch spriteBatch)
-        {
-            if (this.throw_state == throwing_state.idle)
-            {
-                
-            }
-            else
-            {
-                spriteBatch.DrawRectangle((RectangleF)Bounds, Color.Yellow, 3f);
-
-                double distancerope = Vector2.Distance(myPlayer.Bounds.Position, this.Bounds.Position);
-                float ropeThickness = 5;
-                float ropeJoint = 10;
-
-                for(int i = 0; i < (int)(distancerope); i += (int)ropeJoint)
-                {
-                    Rectangle Start = new Rectangle((int)(myPlayer.Bounds.Position.X + ((108 + ropeThickness) * 0.5)), (int)(myPlayer.Bounds.Position.Y + (i * Math.Sin( - Math.PI/2.0)) + ((108 + ropeThickness) * 0.5)),(int)ropeJoint, (int)ropeThickness);
-                    spriteBatch.Draw(this._RopeTexture_Test, Start, null, Color.Fuchsia, (float)( Math.PI / 2.0), new Vector2(0, ropeThickness * 0.5f), 0, 0);
-                }
-            }
-        }
-
-        public void OnCollision(CollisionEventArgs collisionInfo)
-        {
-
-        }
-
-        double distance = 108 * 5;
-
-        public void ThrowHook(GameTime _mTimimg)
-        {
-            if (throw_state == throwing_state.startthrow)
-            {
-                this.Bounds.Position = new Vector2(this.myPlayer.Bounds.Position.X, this.myPlayer.Bounds.Position.Y);
-                _myTime += _mTimimg.GetElapsedSeconds();
-            }
-
-            if (throw_state == throwing_state.throwing)
-            {
-                double distance = 0, startValo = 0, time = _myTime, gavity = 3000;
-
-                startValo = - Math.Sqrt(2 * gavity * this.distance);
-                distance = (startValo * time) + ((0.5) * gavity * Math.Pow(time, 2));
-                this.Bounds.Position = new Vector2(this.myPlayer.Bounds.Position.X, this.myPlayer.Bounds.Position.Y + (float)distance);
-
-                if(distance > -10)
-                {
-                    throw_state = throwing_state.finalthrow;
-                }
-
-                _myTime += _mTimimg.GetElapsedSeconds();
-            }
-
-            if (throw_state == throwing_state.finalthrow)
-            {
-                _myTime = 0;
-            }
-        }
-
-        public static void Update_Hook_Hitblock(List<IEntity> _myCollide)
-        {
-            foreach (HookBox x in _Hookboxes)
-            {
-                if (x.throw_state == throwing_state.startthrow)
-                {
-                    _myCollide.Add(x);
-                }
-                else if (x.throw_state == throwing_state.throwing)
-                {
-                    _myCollide.Remove(x);
-                    _myCollide.Add(x);
-                }
-                else if (x.throw_state == throwing_state.finalthrow)
-                {
-                    _myCollide.Remove(x);
-                }
-                else if (x.throw_state == throwing_state.idle)
-                {
-                    _myCollide.Remove(x);
-                }
-            }
-        }
-
-
-    }
 }
