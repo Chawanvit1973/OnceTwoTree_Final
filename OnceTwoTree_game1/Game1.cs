@@ -43,6 +43,7 @@ namespace OnceTwoTree_game1
         TiledMapTileLayer _bgLayer;
         TiledMapTileLayer _towerLayer;
         TiledMapTileLayer _platformLayer;
+        TiledMapTileLayer _hookLayer;
 
         bool openConfig1 = true;
         bool openConfig2 = true;
@@ -136,6 +137,10 @@ namespace OnceTwoTree_game1
                 if (tLayer.Name == "Platform")
                 {
                     _platformLayer = tLayer;
+                }
+                if(tLayer.Name == "HookPoint")
+                {
+                    _hookLayer = tLayer;
                 }
             }
 
@@ -386,6 +391,7 @@ namespace OnceTwoTree_game1
             _tiledMapRenderer.Draw(_bgLayer, transformMatrix1);
             _tiledMapRenderer.Draw(_towerLayer, transformMatrix1);
             _tiledMapRenderer.Draw(_platformLayer, transformMatrix1);
+            _tiledMapRenderer.Draw(_hookLayer, transformMatrix1);
             spriteBatch.Begin(transformMatrix: transformMatrix1);
 
             foreach (IEntity entity in _entities)
@@ -421,6 +427,7 @@ namespace OnceTwoTree_game1
             _tiledMapRenderer.Draw(_bgLayer, transformMatrix2);
             _tiledMapRenderer.Draw(_towerLayer, transformMatrix2);
             _tiledMapRenderer.Draw(_platformLayer, transformMatrix2);
+            _tiledMapRenderer.Draw(_hookLayer, transformMatrix2);
             spriteBatch.Begin(transformMatrix: transformMatrix2);
 
             foreach (IEntity entity in _entities)
