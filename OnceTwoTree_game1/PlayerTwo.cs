@@ -28,6 +28,7 @@ namespace OnceTwoTree_game1
         protected Texture2D UI_check;
         protected Texture2D UI_popup;
         protected Texture2D UI_energy;
+        protected Texture2D UI_half;
 
         private KeyboardState _currentKey;
         private KeyboardState _oldKey;
@@ -83,7 +84,7 @@ namespace OnceTwoTree_game1
         Rectangle triggerRec, barRec, dropRec, scLRec, scRRec;
 
         #region SkillCheck var & Staminabar
-        public Vector2 barPos, leftHandPos, rightHandPos, triggerPos, insideBarPos, dropBarPos, checkBarPosL, checkBarPosR;
+        public Vector2 barPos, leftHandPos, rightHandPos, triggerPos, insideBarPos, dropBarPos, checkBarPosL, checkBarPosR ,halfPos;
         public Vector2 dropBarScale, checkBarScaleL, checkBarScaleR;
         public Vector2 staminaPos, energyPos;
         #endregion
@@ -106,6 +107,7 @@ namespace OnceTwoTree_game1
             UI_check = _game.Content.Load<Texture2D>("Resources\\UI\\UI_skillcheck_trigger");
             UI_popup = _game.Content.Load<Texture2D>("Resources\\UI\\UI_popup2");
             UI_energy = _game.Content.Load<Texture2D>("Resources\\UI\\UI_energy");
+            UI_half = _game.Content.Load<Texture2D>("Resources\\UI\\UI_separateScene");
 
             totalElapsed = 0;
             timePerFrame = 0.025f;
@@ -126,7 +128,7 @@ namespace OnceTwoTree_game1
             p_climbFrame = 0;
             //Basic Setting
             wallCheckLeft = wallCheckRight = false;
-            isFlip = false;
+            isFlip = true;
             leftHand = false;
             onAir = false;
 
@@ -230,7 +232,7 @@ namespace OnceTwoTree_game1
                         }
                     case 3:
                         {
-                            spriteBatch.Draw(P_fall, Bounds.Position, new Rectangle(P_fall.Width/2, 0, 144, 108), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
+                            spriteBatch.Draw(P_fall, Bounds.Position, new Rectangle(P_fall.Width/2 + 5, 0, 144, 108), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
                             break;
                         }
                 }
@@ -257,7 +259,7 @@ namespace OnceTwoTree_game1
                         }
                     case 3:
                         {
-                            spriteBatch.Draw(P_fall, Bounds.Position, new Rectangle(P_fall.Width / 2 , 0, 144, 108), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
+                            spriteBatch.Draw(P_fall, Bounds.Position, new Rectangle(P_fall.Width / 2 +5 , 0, 144, 108), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
                             break;
                         }
                 }
@@ -447,13 +449,13 @@ namespace OnceTwoTree_game1
             }
             else if (onClimb == false && onAir == false)
             {
-                if (_currentKey.IsKeyDown(Keys.Right) && Bounds.Position.X < _game.GetMapWidth() - ((RectangleF)Bounds).Width)
+                if (_currentKey.IsKeyDown(Keys.Right) && Bounds.Position.X  < _game.GetMapWidth() - ((RectangleF)Bounds).Width)
                 {
                     p_stateNum = 1;
                     isFlip = false;
                     move = new Vector2(Velocity, 0) * gameTime.GetElapsedSeconds() * 50;
-                    if (Bounds.Position.X - _game.GetCameraPos2X() >= 300
-                        && _game.GetCameraPos2X() < _game.GetMapWidth() - 1728)
+                    if ((Bounds.Position.X - _game.GetCameraPos2X()) >= 4200
+                        && _game.GetCamera2X() < _game.GetMapWidth() - 864)
                     {
                         _game.UpdateCamera2X(move);
                     }
@@ -464,8 +466,8 @@ namespace OnceTwoTree_game1
                     p_stateNum = 1;
                     isFlip = true;
                     move = new Vector2(-Velocity, 0) * gameTime.GetElapsedSeconds() * 50;
-                    if (Bounds.Position.X - _game.GetCameraPos2X() <= 400
-                        && _game.GetCameraPos2X() > 0)
+                    if ((Bounds.Position.X - _game.GetCameraPos2X()) <= 4100
+                        && _game.GetCamera2X() > _game.GetMapWidth()/2)
                     {
                         _game.UpdateCamera2X(move);
                     }
@@ -519,7 +521,7 @@ namespace OnceTwoTree_game1
         public void SetSkillCheckPos(Vector2 target)
         {
             //LeftHand
-            leftHandPos = new Vector2(target.X + _game.Window.ClientBounds.Width - 9, target.Y - 27);
+            leftHandPos = new Vector2(target.X + 864 - ((UI_hand.Width) + UI_bar.Width) - 9, target.Y + 27);
             //Bar
             barPos = new Vector2(leftHandPos.X + (UI_hand.Width / 2), leftHandPos.Y);
             //Righthand
@@ -536,8 +538,10 @@ namespace OnceTwoTree_game1
             checkBarScaleR = new Vector2(2, 1);
             checkBarPosR = new Vector2(insideBarPos.X + UI_insidebar.Width - (UI_check.Width / 3 * checkBarScaleR.X) - 4.6f, insideBarPos.Y + 4.6f);
             //Stamina
-            staminaPos = new Vector2(target.X + 1728- 9, target.Y + 486 - UI_stamina.Height / 2);
-            energyPos = new Vector2(target.X + 1728 - 32.5f, (target.Y + 486 - UI_stamina.Height / 2) + 23.5f);
+            staminaPos = new Vector2(target.X + 864 - UI_stamina.Width - 9, target.Y + 486 - UI_stamina.Height / 2);
+            energyPos = new Vector2(target.X + 864 - UI_stamina.Width + 14.5f, (target.Y + 486 - UI_stamina.Height / 2) + 23.5f);
+            //Half
+            halfPos = new Vector2(target.X, target.Y);
         }
 
         public void DrawSkilCheck(SpriteBatch spriteBatch)
@@ -566,7 +570,8 @@ namespace OnceTwoTree_game1
             //spriteBatch.Draw(UI_bar, barPos, new Rectangle(0, UI_bar.Height/2, UI_bar.Width, UI_bar.Height / 2), Color.White);
             //Inside
             //spriteBatch.Draw(UI_insidebar, insideBarPos, new Rectangle(0, UI_insidebar.Height * frameInsideBar / 3, UI_insidebar.Width, UI_insidebar.Height / 3), Color.White);
-
+            //Half
+            spriteBatch.Draw(UI_half, halfPos, new Rectangle(UI_half.Width/2, 0, UI_half.Width/ 2, UI_half.Height), Color.White);
         }
         public void SkillCheck(GameTime gameTime)
         {

@@ -28,6 +28,7 @@ namespace OnceTwoTree_game1
         protected Texture2D UI_check;
         protected Texture2D UI_popup;
         protected Texture2D UI_energy;
+        protected Texture2D UI_half;
 
         private KeyboardState _currentKey;
         private KeyboardState _oldKey;
@@ -82,7 +83,7 @@ namespace OnceTwoTree_game1
         Rectangle triggerRec, barRec, dropRec, scLRec, scRRec;
 
         #region SkillCheck var & Staminabar
-        public Vector2 barPos, leftHandPos, rightHandPos,triggerPos,insideBarPos,dropBarPos,checkBarPosL,checkBarPosR;
+        public Vector2 barPos, leftHandPos, rightHandPos,triggerPos,insideBarPos,dropBarPos,checkBarPosL,checkBarPosR, halfPos;
         public Vector2 dropBarScale, checkBarScaleL, checkBarScaleR;
         public Vector2 staminaPos,energyPos;
         #endregion
@@ -105,7 +106,8 @@ namespace OnceTwoTree_game1
             UI_check = _game.Content.Load<Texture2D>("Resources\\UI\\UI_skillcheck_trigger");
             UI_popup = _game.Content.Load<Texture2D>("Resources\\UI\\UI_Popup");
             UI_energy = _game.Content.Load<Texture2D>("Resources\\UI\\UI_energy");
-            
+            UI_half = _game.Content.Load<Texture2D>("Resources\\UI\\UI_separateScene");
+
             totalElapsed = 0;
             timePerFrame = 0.025f;
             //energy config
@@ -453,10 +455,11 @@ namespace OnceTwoTree_game1
                     p_stateNum = 1;
                     isFlip = false;
                     move = new Vector2(Velocity, 0) * gameTime.GetElapsedSeconds() * 50;
-                    if (Bounds.Position.X - _game.GetCameraPos1X() >= 400
-                        && _game.GetCameraPos1X() < _game.GetMapWidth() - 1728)
+                    if (Bounds.Position.X - _game.GetCameraPos1X() >= 400 &&
+                        _game.GetCamera1X() + 868 < _game.GetMapWidth() / 2)
                     {
-                        _game.UpdateCamera1X(move);
+                            _game.UpdateCamera1X(move);
+
                     }
                     Bounds.Position += move;
                 }
@@ -539,6 +542,7 @@ namespace OnceTwoTree_game1
             //Stamina
             staminaPos = new Vector2(target.X + 9, target.Y + 486 - UI_stamina.Height / 2);
             energyPos = new Vector2(target.X + 32.5f, (target.Y + 486 - UI_stamina.Height / 2)+23.5f);
+            halfPos = new Vector2(target.X + 864 - UI_half.Width /2 , target.Y);
         }
 
         public void DrawSkilCheck(SpriteBatch spriteBatch)
@@ -567,6 +571,8 @@ namespace OnceTwoTree_game1
             //spriteBatch.Draw(UI_bar, barPos, new Rectangle(0, UI_bar.Height/2, UI_bar.Width, UI_bar.Height / 2), Color.White);
             //Inside
             //spriteBatch.Draw(UI_insidebar, insideBarPos, new Rectangle(0, UI_insidebar.Height * frameInsideBar / 3, UI_insidebar.Width, UI_insidebar.Height / 3), Color.White);
+            //Half
+            spriteBatch.Draw(UI_half, halfPos, new Rectangle(0, 0, UI_half.Width / 2, UI_half.Height), Color.White);
 
         }
         public void SkillCheck(GameTime gameTime)

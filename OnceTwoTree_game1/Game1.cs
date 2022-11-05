@@ -336,16 +336,16 @@ namespace OnceTwoTree_game1
 
             _collisionComponent.Update(gameTime);
             //follow look at
-/*
+
             _camera1.LookAt(_bgPosition1 + _cameraPosition1);
             playerInstance1.SetSkillCheckPos(_camera1.Position);
-            playerInstance1.SkillCheck(gameTime);*/
-            _panelPos1 = new Vector2(_camera1.Position.X + Window.ClientBounds.Width - 540, _camera1.Position.Y + Window.ClientBounds.Height - 324);
+            playerInstance1.SkillCheck(gameTime);
+            _panelPos1 = new Vector2(_camera1.Position.X , _camera1.Position.Y + Window.ClientBounds.Height - 324);
 
             _camera2.LookAt(_bgPosition2 + _cameraPosition2);
             playerInstance2.SetSkillCheckPos(_camera2.Position);
             playerInstance2.SkillCheck(gameTime);
-            //_panelPos2 = Vector2.Zero;
+            _panelPos2 = new Vector2(_camera2.Position.X +50, _camera2.Position.Y +50);
             //hook update
 
             _oldKey = _currentKey;
@@ -381,13 +381,13 @@ namespace OnceTwoTree_game1
         }
         public void DrawGameplay()
         {
-            /*GraphicsDevice.Viewport = leftView;
+            GraphicsDevice.Viewport = leftView;
             var transformMatrix1 = _camera1.GetViewMatrix();
             _tiledMapRenderer.Draw(_bgLayer, transformMatrix1);
             _tiledMapRenderer.Draw(_towerLayer, transformMatrix1);
             _tiledMapRenderer.Draw(_platformLayer, transformMatrix1);
-            spriteBatch.Begin(transformMatrix: transformMatrix1);*/
-/*
+            spriteBatch.Begin(transformMatrix: transformMatrix1);
+
             foreach (IEntity entity in _entities)
             {
                 entity.Draw(spriteBatch);
@@ -397,7 +397,7 @@ namespace OnceTwoTree_game1
                     spriteBatch.DrawString(font, "Player Pos = " + playerInstance1.Bounds.Position, new Vector2(_panelPos1.X + 10, _panelPos1.Y + 10), Color.Black);
                     spriteBatch.DrawString(font, "Camera.Pos = " + _camera1.Position, new Vector2(_panelPos1.X + 10, _panelPos1.Y + 30), Color.Black);
                     spriteBatch.DrawString(font, "CameraPosition = " + _cameraPosition1, new Vector2(_panelPos1.X + 10, _panelPos1.Y + 50), Color.Black);
-                    spriteBatch.DrawString(font, "OnAir = " + (playerInstance1.onAir), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 70), Color.Black);
+                    spriteBatch.DrawString(font, "DcamX = " + (playerInstance1.Bounds.Position.X - _cameraPosition1.X), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 70), Color.Black);
                     spriteBatch.DrawString(font, "Player Stage= " + (playerInstance1.p_stateNum), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 90), Color.Black);
                     spriteBatch.DrawString(font, "Wall Check R= " + (playerInstance1.wallCheckRight), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 110), Color.Black);
                     spriteBatch.DrawString(font, "Wall Check L = " + (playerInstance1.wallCheckLeft), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 130), Color.Black);
@@ -414,7 +414,7 @@ namespace OnceTwoTree_game1
                 }
 
             }
-            spriteBatch.End();*/
+            spriteBatch.End();
 
             GraphicsDevice.Viewport = rightView;
             var transformMatrix2 = _camera2.GetViewMatrix();
@@ -430,23 +430,23 @@ namespace OnceTwoTree_game1
                 {
 
                     
-                    spriteBatch.Draw(block, _panelPos1, null, Color.Brown, 0f, Vector2.Zero, new Vector2(5, 3f), SpriteEffects.None, 0);
-                    spriteBatch.DrawString(font, "Player Pos = " + playerInstance2.Bounds.Position, new Vector2(_panelPos1.X + 10, _panelPos1.Y + 10), Color.Black);
-                    spriteBatch.DrawString(font, "Camera.Pos = " + _camera1.Position, new Vector2(_panelPos1.X + 10, _panelPos1.Y + 30), Color.Black);
-                    spriteBatch.DrawString(font, "CameraPosition = " + _cameraPosition1, new Vector2(_panelPos1.X + 10, _panelPos1.Y + 50), Color.Black);
-                    spriteBatch.DrawString(font, "OnAir = " + (playerInstance2.onAir), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 70), Color.Black);
-                    spriteBatch.DrawString(font, "Player Stage= " + (playerInstance2.p_stateNum), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 90), Color.Black);
-                    spriteBatch.DrawString(font, "Wall Check R= " + (playerInstance2.wallCheckRight), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 110), Color.Black);
-                    spriteBatch.DrawString(font, "Wall Check L = " + (playerInstance2.wallCheckLeft), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 130), Color.Black);
-                    spriteBatch.DrawString(font, "Climb = " + (playerInstance2.onClimb), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 150), Color.Black);
-                    spriteBatch.DrawString(font, "CountG = " + (playerInstance2.countG), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 170), Color.Black);
-                    spriteBatch.DrawString(font, "CountW = " + (playerInstance2.countW), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 190), Color.Black);
-                    spriteBatch.DrawString(font, "CountC = " + (playerInstance2.countC), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 210), Color.Black);
-                    spriteBatch.DrawString(font, "oldCount = " + (playerInstance2.timeCount), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 230), Color.Black);
-                    spriteBatch.DrawString(font, "Dcount = " + (playerInstance2.timeCount - playerInstance2.countG), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 250), Color.Black);
-                    spriteBatch.DrawString(font, "FirstCheck = " + (playerInstance2.firstCheck), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 270), Color.Black);
-                    spriteBatch.DrawString(font, "Energy = " + (playerInstance2.energy), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 290), Color.Black);
-                    spriteBatch.DrawString(font, "Throwstate = " + (_entities.Count), new Vector2(_panelPos1.X + 270, _panelPos1.Y + 290), Color.Black);
+                    spriteBatch.Draw(block, _panelPos2, null, Color.Brown, 0f, Vector2.Zero, new Vector2(5, 3f), SpriteEffects.None, 0);
+                    spriteBatch.DrawString(font, "Player Pos = " + playerInstance2.Bounds.Position, new Vector2(_panelPos2.X + 10, _panelPos2.Y + 10), Color.Black);
+                    spriteBatch.DrawString(font, "Camera.Pos = " + _camera2.Position, new Vector2(_panelPos2.X + 10, _panelPos2.Y + 30), Color.Black);
+                    spriteBatch.DrawString(font, "CameraPosition = " + _cameraPosition2, new Vector2(_panelPos2.X + 10, _panelPos2.Y + 50), Color.Black);
+                    spriteBatch.DrawString(font, "DcamX = " + (playerInstance2.Bounds.Position.X - _cameraPosition2.X), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 70), Color.Black);
+                    spriteBatch.DrawString(font, "DcamY= " + (playerInstance2.Bounds.Position.Y), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 90), Color.Black);
+                    spriteBatch.DrawString(font, "Wall Check R= " + (playerInstance2.wallCheckRight), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 110), Color.Black);
+                    spriteBatch.DrawString(font, "Wall Check L = " + (playerInstance2.wallCheckLeft), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 130), Color.Black);
+                    spriteBatch.DrawString(font, "Climb = " + (playerInstance2.onClimb), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 150), Color.Black);
+                    spriteBatch.DrawString(font, "CountG = " + (playerInstance2.countG), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 170), Color.Black);
+                    spriteBatch.DrawString(font, "CountW = " + (playerInstance2.countW), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 190), Color.Black);
+                    spriteBatch.DrawString(font, "CountC = " + (playerInstance2.countC), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 210), Color.Black);
+                    spriteBatch.DrawString(font, "oldCount = " + (playerInstance2.timeCount), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 230), Color.Black);
+                    spriteBatch.DrawString(font, "Dcount = " + (playerInstance2.timeCount - playerInstance2.countG), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 250), Color.Black);
+                    spriteBatch.DrawString(font, "FirstCheck = " + (playerInstance2.firstCheck), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 270), Color.Black);
+                    spriteBatch.DrawString(font, "Energy = " + (playerInstance2.energy), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 290), Color.Black);
+                    spriteBatch.DrawString(font, "Throwstate = " + (_entities.Count), new Vector2(_panelPos2.X + 270, _panelPos2.Y + 290), Color.Black);
 
                 }
             }
