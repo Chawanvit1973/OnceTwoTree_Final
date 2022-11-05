@@ -284,6 +284,9 @@ namespace OnceTwoTree_game1
             playerInstance.SetSkillCheckPos(_camera.Position);
             playerInstance.SkillCheck(gameTime);
             _panelPos = new Vector2(_camera.Position.X + Window.ClientBounds.Width - 540, _camera.Position.Y + Window.ClientBounds.Height - 324);
+
+            //hook update
+            HookBox.Update_Hook_Hitblock(_entities);
         }
 
         #region Scene Manage
@@ -346,7 +349,7 @@ namespace OnceTwoTree_game1
                         spriteBatch.DrawString(font, "DCount = " + (playerInstance.timeCount-playerInstance.countG), new Vector2(_panelPos.X + 10, _panelPos.Y + 250), Color.Black);
                         spriteBatch.DrawString(font, "FirstCheck = " + (playerInstance.firstCheck), new Vector2(_panelPos.X + 10, _panelPos.Y + 270), Color.Black);
                         spriteBatch.DrawString(font, "Energy = " + (playerInstance.energy), new Vector2(_panelPos.X + 10, _panelPos.Y + 290), Color.Black);
-                        spriteBatch.DrawString(font, "EnergyBar = " + (playerInstance.energyBar), new Vector2(_panelPos.X + 270, _panelPos.Y + 290), Color.Black);
+                        spriteBatch.DrawString(font, "Throwstate = " + (_entities.Count), new Vector2(_panelPos.X + 270, _panelPos.Y + 290), Color.Black);
                     
                     }
                 }
