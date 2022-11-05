@@ -659,18 +659,18 @@ namespace OnceTwoTree_game1
             }
         }
 
-        public static void Update_Hook_Hitblock(CollisionComponent _myCollide)
+        public static void Update_Hook_Hitblock(List<IEntity> _myCollide)
         {
             foreach (HookBox x in _Hookboxes)
             {
                 if (x.throw_state == throwing_state.startthrow)
                 {
-                    _myCollide.Insert(x);
+                    _myCollide.Add(x);
                 }
                 else if (x.throw_state == throwing_state.throwing)
                 {
                     _myCollide.Remove(x);
-                    _myCollide.Insert(x);
+                    _myCollide.Add(x);
                 }
                 else if (x.throw_state == throwing_state.finalthrow)
                 {
