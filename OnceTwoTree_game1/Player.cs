@@ -377,10 +377,9 @@ namespace OnceTwoTree_game1
                 Bounds.Position -= new Vector2(0, 10);
             }
 
-            if (_currentKey.IsKeyDown(Keys.W) && _oldKey.IsKeyUp(Keys.W) && (wallCheckRight == true || wallCheckLeft == true))
+            if (_currentKey.IsKeyDown(Keys.W) && _oldKey.IsKeyUp(Keys.W))
             {
-                if (!onClimb) { onClimb = true; }
-                else if (onClimb) { onClimb = false; }
+                onClimb = true;
             }
 
 
@@ -578,7 +577,7 @@ namespace OnceTwoTree_game1
             _RopeTexture_Test.SetData(new[] { Color.Aqua });
 
             //สำหรับ Load Texture เชือก
-            //_RopeTexture = _game.Content.Load<Texture2D>();
+            _RopeTexture = _game.Content.Load<Texture2D>("Resources\\UI\\UI_Rope");
 
         }
 
@@ -586,7 +585,7 @@ namespace OnceTwoTree_game1
         public static void LoadHookToPlayer(Player _mPlayer, Game1 game)
         {
             _PlayerControl.Add(_mPlayer);
-            _Hookboxes.Add(new HookBox(game, new RectangleF(Point2.Zero, new Size2(108, 108))));
+            _Hookboxes.Add(new HookBox(game, new RectangleF(Point2.Zero, new Size2(54, 54))));
             _mPlayer.myhook = _Hookboxes[_Hookboxes.Count-1];
         }
 
@@ -649,13 +648,13 @@ namespace OnceTwoTree_game1
                 spriteBatch.DrawRectangle((RectangleF)Bounds, Color.Yellow, 3f);
 
                 double distancerope = Vector2.Distance(myPlayer.Bounds.Position, this.Bounds.Position);
-                float ropeThickness = 5;
+                float ropeThickness = 10;
                 float ropeJoint = 10;
 
-                for(int i = 0; i < (int)(distancerope); i += (int)ropeJoint)
+                for(int i = 0; i <= (int)(distancerope - ropeJoint); i += (int)ropeJoint)
                 {
-                    Rectangle Start = new Rectangle((int)(myPlayer.Bounds.Position.X + ((108 + ropeThickness) * 0.5)), (int)(myPlayer.Bounds.Position.Y + (i * Math.Sin( - Math.PI/2.0)) + ((108 + ropeThickness) * 0.5)),(int)ropeJoint, (int)ropeThickness);
-                    spriteBatch.Draw(this._RopeTexture_Test, Start, null, Color.Fuchsia, (float)( Math.PI / 2.0), new Vector2(0, ropeThickness * 0.5f), 0, 0);
+                    Rectangle Start = new Rectangle((int)(myPlayer.Bounds.Position.X + ((108 + ropeJoint) * 0.5)), (int)(myPlayer.Bounds.Position.Y + (i * Math.Sin( - Math.PI/2.0)) /*+ ((168 + ropeThickness) * 0.5)*/),(int)ropeJoint, (int)ropeThickness);
+                    spriteBatch.Draw(this._RopeTexture, Start, null, Color.White, (float)( Math.PI / 2.0), new Vector2(0, ropeThickness * 0.5f), 0, 0);
                 }
             }
         }
@@ -697,18 +696,18 @@ namespace OnceTwoTree_game1
             }
         }
 
-        public static void Update_Hook_Hitblock(List<IEntity> _myCollide)
+        public static void Update_Hook_Hitblock(CollisionComponent _myCollide)
         {
             foreach (HookBox x in _Hookboxes)
             {
                 if (x.throw_state == throwing_state.startthrow)
                 {
-                    _myCollide.Add(x);
+                    _myCollide.Insert(x);
                 }
                 else if (x.throw_state == throwing_state.throwing)
                 {
                     _myCollide.Remove(x);
-                    _myCollide.Add(x);
+                    _myCollide.Insert(x);
                 }
                 else if (x.throw_state == throwing_state.finalthrow)
                 {

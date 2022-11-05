@@ -286,7 +286,7 @@ namespace OnceTwoTree_game1
             _panelPos = new Vector2(_camera.Position.X + Window.ClientBounds.Width - 540, _camera.Position.Y + Window.ClientBounds.Height - 324);
 
             //hook update
-            HookBox.Update_Hook_Hitblock(_entities);
+            HookBox.Update_Hook_Hitblock(_collisionComponent);
         }
 
         #region Scene Manage
