@@ -578,7 +578,7 @@ namespace OnceTwoTree_game1
             _RopeTexture_Test.SetData(new[] { Color.Aqua });
 
             //สำหรับ Load Texture เชือก
-            //_RopeTexture.Load();
+            //_RopeTexture = _game.Content.Load<Texture2D>();
 
         }
 
