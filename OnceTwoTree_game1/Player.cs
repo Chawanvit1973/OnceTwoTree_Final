@@ -552,9 +552,9 @@ namespace OnceTwoTree_game1
             _mPlayer.myhook = _Hookboxes[_Hookboxes.Count-1];
         }
 
-        enum throwing_state { throwing, startthrow, finalthrow, idle }
+        public enum throwing_state { throwing, startthrow, finalthrow, idle }
 
-        throwing_state throw_state = throwing_state.idle;
+        public throwing_state throw_state = throwing_state.idle;
 
         KeyboardState _oldkey;
         public virtual void Update(GameTime gameTime)
@@ -602,7 +602,24 @@ namespace OnceTwoTree_game1
 
         public virtual void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.DrawRectangle((RectangleF)Bounds, Color.Yellow, 3f);
+            if (this.throw_state == throwing_state.idle)
+            {
+                
+            }
+            else
+            {
+                spriteBatch.DrawRectangle((RectangleF)Bounds, Color.Yellow, 3f);
+
+                double distancerope = Vector2.Distance(myPlayer.Bounds.Position, this.Bounds.Position);
+                float ropeThickness = 5;
+                float ropeJoint = 10;
+
+                for(int i = 0; i < (int)(distancerope); i += (int)ropeJoint)
+                {
+                    Rectangle Start = new Rectangle((int)(myPlayer.Bounds.Position.X + ((108 + ropeThickness) * 0.5)), (int)(myPlayer.Bounds.Position.Y + (i * Math.Sin( - Math.PI/2.0)) + ((108 + ropeThickness) * 0.5)),(int)ropeJoint, (int)ropeThickness);
+                    spriteBatch.Draw(this._RopeTexture_Test, Start, null, Color.Fuchsia, (float)( Math.PI / 2.0), new Vector2(0, ropeThickness * 0.5f), 0, 0);
+                }
+            }
         }
 
         public void OnCollision(CollisionEventArgs collisionInfo)
@@ -610,7 +627,7 @@ namespace OnceTwoTree_game1
 
         }
 
-        double distance = 108 * 6;
+        double distance = 108 * 5;
 
         public void ThrowHook(GameTime _mTimimg)
         {
@@ -622,7 +639,7 @@ namespace OnceTwoTree_game1
 
             if (throw_state == throwing_state.throwing)
             {
-                double distance = 0, startValo = 0, time = _myTime, gavity = 5000;
+                double distance = 0, startValo = 0, time = _myTime, gavity = 3000;
 
                 startValo = - Math.Sqrt(2 * gavity * this.distance);
                 distance = (startValo * time) + ((0.5) * gavity * Math.Pow(time, 2));
@@ -661,7 +678,7 @@ namespace OnceTwoTree_game1
                 }
                 else if (x.throw_state == throwing_state.idle)
                 {
-
+                    _myCollide.Remove(x);
                 }
             }
         }
