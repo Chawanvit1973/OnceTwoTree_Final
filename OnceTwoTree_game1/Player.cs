@@ -498,4 +498,147 @@ namespace OnceTwoTree_game1
         }
         #endregion
     }
+
+    internal class HookBox : IEntity
+    {
+
+        private readonly Game1 _game;
+
+        public IShapeF Bounds { get; }
+
+        Texture2D _RopeTexture; // รอimportรูปเชือก
+        Texture2D _RopeTexture_Test;
+
+        const int _MaxPlayer = 2;
+
+        bool _ishooking = false;
+        double _myTime = 0.0;
+
+        Player myPlayer;
+
+        static List<Player> _PlayerControl = new List<Player>();
+        static List<HookBox> _Hookboxes = new List<HookBox>();
+
+        CollisionComponent _myBox;
+
+
+        internal HookBox(Game1 game, IShapeF myShape)
+        {
+            this._game = game;
+            Bounds = myShape;
+
+            //สำหรับ Test
+            _RopeTexture_Test = new Texture2D(game.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+            _RopeTexture_Test.SetData(new[] { Color.Aqua });
+
+            //สำหรับ Load Texture เชือก
+            //_RopeTexture.Load();
+
+        }
+
+
+        public static void LoadHookToPlayer(Player _mPlayer, Game1 game)
+        {
+            _PlayerControl.Add(_mPlayer);
+            _Hookboxes.Add(new HookBox(game, new RectangleF(Point2.Zero, new Size2(108, 108))));
+        }
+
+        enum throwing_state { throwing, startthrow, finalthrow, idle }
+        throwing_state throw_state = throwing_state.idle;
+
+        public virtual void Update(GameTime gameTime)
+        {
+            KeyboardState keyboard = Keyboard.GetState();
+
+            #region ThrowingPlayer1
+            if ((keyboard.IsKeyDown(Keys.E) && _Hookboxes[0].throw_state != throwing_state.throwing) || _Hookboxes[0].throw_state == throwing_state.startthrow) // สำหรับ player 1 แม้จะมี player แค่คนเดียว
+            {
+                if (_Hookboxes[0].throw_state != throwing_state.throwing)
+                {
+                    //อาจจะ set Animate ไว้ตรงนี้ก็ได้
+                }
+
+                if (keyboard.IsKeyUp(Keys.E) && _Hookboxes[0].throw_state != throwing_state.throwing)
+                {
+                    myPlayer = _PlayerControl[0];
+                    _Hookboxes[0].throw_state = throwing_state.startthrow;
+                    _Hookboxes[0].ThrowHook(gameTime);
+                }
+
+                else if (_Hookboxes[0].throw_state == throwing_state.startthrow)
+                {
+                    _Hookboxes[0].throw_state = throwing_state.throwing;
+                    _Hookboxes[0].ThrowHook(gameTime);
+                }
+
+            }
+
+            else if (_Hookboxes[0].throw_state == throwing_state.throwing)
+            {
+                _Hookboxes[0].ThrowHook(gameTime);
+            }
+
+            else if (_Hookboxes[0].throw_state == throwing_state.finalthrow)
+            {
+
+            }
+            #endregion
+        }
+
+        public virtual void Draw(SpriteBatch spriteBatch)
+        {
+            //spriteBatch.DrawRectangle((RectangleF)Bounds, Color.Red, 3f);
+        }
+
+        public void OnCollision(CollisionEventArgs collisionInfo)
+        {
+
+        }
+
+
+        public void ThrowHook(GameTime _mTimimg)
+        {
+            if (throw_state == throwing_state.startthrow)
+            {
+                this.Bounds.Position = new Vector2(this.myPlayer.Bounds.Position.X, this.myPlayer.Bounds.Position.Y);
+                _myTime += _mTimimg.GetElapsedSeconds();
+            }
+
+            if (throw_state == throwing_state.throwing)
+            {
+
+            }
+
+            if (throw_state == throwing_state.finalthrow)
+            {
+
+            }
+        }
+
+        public static void Update_Hook_Hitblock(CollisionComponent _myCollide)
+        {
+            foreach (HookBox x in _Hookboxes)
+            {
+                if (x.throw_state == throwing_state.startthrow)
+                {
+                    _myCollide.Insert(x);
+                }
+                else if (x.throw_state == throwing_state.throwing)
+                {
+                    _myCollide.Remove(x);
+                    _myCollide.Insert(x);
+                }
+                else if (x.throw_state == throwing_state.finalthrow)
+                {
+                    _myCollide.Remove(x);
+                }
+                else if (x.throw_state == throwing_state.idle)
+                {
+
+                }
+            }
+        }
+
+
+    }
 }
