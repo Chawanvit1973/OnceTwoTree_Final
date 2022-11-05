@@ -10,8 +10,7 @@
 
 #-------------------------------- References --------------------------------#
 
-/reference:..\..\..\..\..\iceku\.nuget\packages\monogame.extended.content.pipeline\3.8.0\tools\MonoGame.Extended.Content.Pipeline.dll
-/reference:C:\Users\USER\.nuget\packages\monogame.extended.content.pipeline\3.8.0\tools\MonoGame.Extended.Content.Pipeline.dll
+/reference:C:\Users\iceku\.nuget\packages\monogame.extended.content.pipeline\3.8.0\tools\MonoGame.Extended.Content.Pipeline.dll
 
 #---------------------------------- Content ---------------------------------#
 
@@ -178,6 +177,18 @@
 /processorParam:TextureFormat=Color
 /build:Resources/UI/UI_bar.png
 
+#begin Resources/UI/UI_energy.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Resources/UI/UI_energy.png
+
 #begin Resources/UI/UI_hand.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -213,6 +224,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Resources/UI/UI_Popup.png
+
+#begin Resources/UI/UI_popup2.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Resources/UI/UI_popup2.png
 
 #begin Resources/UI/UI_separateScene.png
 /importer:TextureImporter

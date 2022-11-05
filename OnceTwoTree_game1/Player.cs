@@ -14,7 +14,7 @@ namespace OnceTwoTree_game1
     public class Player : IEntity
     {
         private readonly Game1 _game;
-        
+
         public int Velocity = 10;
         Vector2 move;
 
@@ -27,6 +27,7 @@ namespace OnceTwoTree_game1
         protected Texture2D UI_hand;
         protected Texture2D UI_check;
         protected Texture2D UI_popup;
+        protected Texture2D UI_energy;
 
         private KeyboardState _currentKey;
         private KeyboardState _oldKey;
@@ -34,7 +35,14 @@ namespace OnceTwoTree_game1
         float totalElapsed;
         float timePerFrame;
 
+        #region StaminaVar
+        float tiredZone = 25;
         public float energy;
+        public float maxEnergy;
+        public float energyBar;
+        public float maxEnergyBar; 
+        #endregion
+
         float totalTime;
         float maxTime;
 
@@ -63,10 +71,10 @@ namespace OnceTwoTree_game1
 
         Rectangle triggerRec, barRec, dropRec, scLRec, scRRec;
 
-        #region SkillCheck var
+        #region SkillCheck var & Staminabar
         public Vector2 barPos, leftHandPos, rightHandPos,triggerPos,insideBarPos,dropBarPos,checkBarPosL,checkBarPosR;
         public Vector2 dropBarScale, checkBarScaleL, checkBarScaleR;
-
+        public Vector2 staminaPos,energyPos;
         #endregion
         
         //public CollisionEventArgs _currentBlock;
@@ -82,18 +90,24 @@ namespace OnceTwoTree_game1
             UI_hand = _game.Content.Load<Texture2D>("Resources\\UI\\UI_hand");
             UI_check = _game.Content.Load<Texture2D>("Resources\\UI\\UI_skillcheck_trigger");
             UI_popup = _game.Content.Load<Texture2D>("Resources\\UI\\UI_Popup");
+            UI_energy = _game.Content.Load<Texture2D>("Resources\\UI\\UI_energy");
             
             totalElapsed = 0;
             timePerFrame = 1;
             //energy config
             totalTime = 0;
             maxTime = 0.5f;
-            energy = 100;
+            maxEnergy = 100;
+            energy = maxEnergy;
+            
 
             wallCheckLeft = wallCheckRight = false;
             isFlip = false;
             leftHand = false;
-           
+
+            energyBar = UI_energy.Height;
+            maxEnergyBar = UI_energy.Height;
+
         }
 
         
@@ -135,7 +149,14 @@ namespace OnceTwoTree_game1
             //Debug
             if (countW > 10) { countW = 0; }
             if (countC > 10) { countC = 0; }
-            
+
+            //Energy
+            StaminaSystem((float)gameTime.ElapsedGameTime.TotalSeconds);
+            energyBar = maxEnergyBar - (((energy / maxEnergy)) * maxEnergyBar );
+            if(energyBar > maxEnergyBar)
+            {
+                energyBar = maxEnergyBar;
+            }
         }
 
         public virtual void Draw(SpriteBatch spriteBatch)
@@ -249,8 +270,9 @@ namespace OnceTwoTree_game1
             {
                 if (_currentKey.IsKeyDown(Keys.A) && _oldKey.IsKeyUp(Keys.A))
                 {
-                    if (leftHand == true && triggerRec.Intersects(scLRec) && energy >0)
+                    if (leftHand == true && triggerRec.Intersects(scLRec) && energy / maxEnergy * 100 > tiredZone )
                     {
+                        energy -= 10;
                         leftHand = false;
                         move = new Vector2(0, Velocity) * gameTime.GetElapsedSeconds() * 100;
                         if (_game.GetCameraPosY() - Bounds.Position.Y <= 864)
@@ -261,6 +283,7 @@ namespace OnceTwoTree_game1
                     }
                     if (triggerRec.Intersects(dropRec))
                     {
+                        energy -= 10;
                         move = new Vector2(0, -Velocity) * gameTime.GetElapsedSeconds() * 100;
                         if (_game.GetCameraPosY() - Bounds.Position.Y <= 864)
                         {
@@ -271,8 +294,9 @@ namespace OnceTwoTree_game1
                 }
                 else if (_currentKey.IsKeyDown(Keys.D) && _oldKey.IsKeyUp(Keys.D))
                 {
-                    if (leftHand == false && triggerRec.Intersects(scRRec) && energy > 0)
+                    if (leftHand == false && triggerRec.Intersects(scRRec) && energy / maxEnergy * 100 > tiredZone)
                     {
+                        energy -= 10;
                         leftHand = true;
                         move = new Vector2(0, Velocity) * gameTime.GetElapsedSeconds() * 100;
                         if (_game.GetCameraPosY() - Bounds.Position.Y <= 864)
@@ -283,6 +307,7 @@ namespace OnceTwoTree_game1
                     }
                     if (triggerRec.Intersects(dropRec))
                     {
+                        energy -= 10;
                         move = new Vector2(0, -Velocity) * gameTime.GetElapsedSeconds() * 100;
                         if (_game.GetCameraPosY() - Bounds.Position.Y <= 864)
                         {
@@ -375,10 +400,10 @@ namespace OnceTwoTree_game1
             //RightChek
             checkBarScaleR = new Vector2(2, 1);
             checkBarPosR = new Vector2(insideBarPos.X + UI_insidebar.Width - (UI_check.Width / 3 * checkBarScaleR.X)  - 4.6f, insideBarPos.Y + 4.6f);
-            //Trigger
-            //triggerPos = new Vector2(insideBarPos.X + UI_insidebar.Width / 2 - (((UI_check.Width / 3)/ 2), insideBarPos.Y + 4.6f);
+            //Stamina
+            staminaPos = new Vector2(target.X + 9, target.Y + 486 - UI_stamina.Height / 2);
+            energyPos = new Vector2(target.X + 32.5f, (target.Y + 486 - UI_stamina.Height / 2)+23.5f);
         }
-
         public void DrawSkillCheck(SpriteBatch spriteBatch)
         {
             //LeftHand
@@ -398,15 +423,20 @@ namespace OnceTwoTree_game1
                 //Trigger
                 spriteBatch.Draw(UI_check, triggerPos, new Rectangle(UI_check.Width * 2 / 3, 0, UI_check.Width / 3, UI_check.Height), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
             }
+            //Stamina
+            spriteBatch.Draw(UI_stamina, staminaPos, new Rectangle(0, 0, UI_stamina.Width, UI_stamina.Height), Color.White);
+            spriteBatch.Draw(UI_energy,new Rectangle((int)energyPos.X,(int)energyPos.Y,UI_energy.Width,(int)energyBar), new Rectangle(0, 0, UI_energy.Width, UI_energy.Height),Color.White);
             //Web Status
             //spriteBatch.Draw(UI_bar, barPos, new Rectangle(0, UI_bar.Height/2, UI_bar.Width, UI_bar.Height / 2), Color.White);
             //Inside
             //spriteBatch.Draw(UI_insidebar, insideBarPos, new Rectangle(0, UI_insidebar.Height * frameInsideBar / 3, UI_insidebar.Width, UI_insidebar.Height / 3), Color.White);
 
         }
-
         public void SkillCheck(GameTime gameTime)
         {
+            //Energy((float)gameTime.ElapsedGameTime.TotalSeconds);
+            //energyBar = energyBar - ((energy / maxEnergy) * maxEnergyBar);
+
             if (onClimb)
             {
                 countW++;
@@ -444,11 +474,11 @@ namespace OnceTwoTree_game1
                 }
                 
                 //Hand ON Set
-                if( leftHand == true && triggerRec.Intersects(scLRec))
+                if( leftHand == true && triggerRec.Intersects(scLRec) && energy / maxEnergy * 100 > tiredZone)
                 {
                     leftHandOn = 1;
                 }
-                else if (leftHand == false && triggerRec.Intersects(scRRec))
+                else if (leftHand == false && triggerRec.Intersects(scRRec) && energy / maxEnergy * 100 > tiredZone)
                 {
                     rightHandOn = 1;
                 }
@@ -466,32 +496,36 @@ namespace OnceTwoTree_game1
                 leftHandOn = 0;
                 rightHandOn = 0;
             }
-   
+
         }
-        public void Energy(float time)
+        public void StaminaSystem(float time)
         {
             totalTime += time;
             if (totalTime > maxTime)
             {
-                energy = energy + 1;
+                energy = energy + 2.5f;
                 totalTime -= maxTime;
             }
 
-            if (energy > 100)
+            if (energy > maxEnergy)
             {
                 energy--;
+            } 
+            else if (energy/maxEnergy * 100 > 50)
+            {
+                maxTime = 0.5f;
+            }
+            else if (energy / maxEnergy * 100 < 50)
+            {
+                maxTime = 0.8f;
+            }
+            else if (energy / maxEnergy * 100 < tiredZone)
+            {
+                maxTime = 2f;
             }
             else if (energy <= 0)
             {
                 energy = 0;
-            }
-            else if (energy >= 50)
-            {
-                maxTime = 0.5f;
-            }
-            else if (energy < 50)
-            {
-                maxTime = 0.1f;
             }
 
         }

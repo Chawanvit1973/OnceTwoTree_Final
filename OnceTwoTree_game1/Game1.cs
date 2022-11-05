@@ -40,6 +40,9 @@ namespace OnceTwoTree_game1
 
         TiledMapObjectLayer _platformTiledObj;
         TiledMapObjectLayer _climbObj;
+        TiledMapTileLayer _bgLayer;
+        TiledMapTileLayer _towerLayer;
+        TiledMapTileLayer _platformLayer;
 
         bool openConfig = true;
         bool isKeyDown = false;
@@ -50,6 +53,10 @@ namespace OnceTwoTree_game1
         
         bool isGameplay;
         bool isMenu;
+
+        Viewport defaultView;
+        Viewport leftView;
+        Viewport rightView;
         #endregion
         public Game1()
         {
@@ -65,9 +72,21 @@ namespace OnceTwoTree_game1
         protected override void Initialize()
         {          
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
-            var viewportadapter = new BoxingViewportAdapter(Window,GraphicsDevice, 1728, 972);
+            //Set DefaultView
+            defaultView = graphics.GraphicsDevice.Viewport;
+            //Set leftView
+            leftView = graphics.GraphicsDevice.Viewport;
+            leftView.Width = graphics.PreferredBackBufferWidth / 2;
+            //Set rightView
+            rightView = graphics.GraphicsDevice.Viewport;
+            rightView.Width = graphics.PreferredBackBufferWidth / 2;
+            rightView.X = graphics.PreferredBackBufferWidth;
+
+
+            var viewportadapter = new BoxingViewportAdapter(Window,GraphicsDevice, graphics.PreferredBackBufferWidth, 972);
             _camera = new OrthographicCamera(viewportadapter);
-            _bgPosition = new Vector2(1728/2, MapHeight-(972/2));
+            _bgPosition = new Vector2(graphics.PreferredBackBufferWidth/2, MapHeight-(972/2));
+
             base.Initialize();
         }
 
@@ -92,13 +111,25 @@ namespace OnceTwoTree_game1
                 {
                     _platformTiledObj = layer;
                 }
-            }
-            //Get Climb Obj
-            foreach (TiledMapObjectLayer layer in _tiledMap.ObjectLayers)
-            {
                 if (layer.Name == "ClimbObject")
                 {
                     _climbObj = layer;
+                }
+            }
+            
+            foreach(TiledMapTileLayer tLayer in _tiledMap.TileLayers)
+            {
+                if(tLayer.Name == "Background")
+                {
+                    _bgLayer = tLayer;
+                }
+                if(tLayer.Name == "Midground")
+                {
+                    _towerLayer = tLayer;
+                }
+                if (tLayer.Name == "Platform")
+                {
+                    _platformLayer = tLayer;
                 }
             }
             
@@ -274,6 +305,7 @@ namespace OnceTwoTree_game1
         }
         public void DrawMenu()
         {
+            GraphicsDevice.Viewport = defaultView;
             spriteBatch.Begin();
 
             spriteBatch.Draw(menu, Vector2.Zero, new Rectangle(0, 0, menu.Width / 2, menu.Height), Color.White);
@@ -282,8 +314,12 @@ namespace OnceTwoTree_game1
         }
         public void DrawGameplay()
         {
+            GraphicsDevice.Viewport = defaultView;
             var transformMatrix = _camera.GetViewMatrix();
-            _tiledMapRenderer.Draw(transformMatrix);
+            _tiledMapRenderer.Draw(_bgLayer,transformMatrix);
+
+            _tiledMapRenderer.Draw(_towerLayer,transformMatrix);
+            _tiledMapRenderer.Draw(_platformLayer,transformMatrix);
             spriteBatch.Begin(transformMatrix: transformMatrix);
 
             foreach (IEntity entity in _entities)
@@ -310,11 +346,14 @@ namespace OnceTwoTree_game1
                         spriteBatch.DrawString(font, "DCount = " + (playerInstance.timeCount-playerInstance.countG), new Vector2(_panelPos.X + 10, _panelPos.Y + 250), Color.Black);
                         spriteBatch.DrawString(font, "FirstCheck = " + (playerInstance.firstCheck), new Vector2(_panelPos.X + 10, _panelPos.Y + 270), Color.Black);
                         spriteBatch.DrawString(font, "Energy = " + (playerInstance.energy), new Vector2(_panelPos.X + 10, _panelPos.Y + 290), Color.Black);
+                        spriteBatch.DrawString(font, "EnergyBar = " + (playerInstance.energyBar), new Vector2(_panelPos.X + 270, _panelPos.Y + 290), Color.Black);
                     
                     }
                 }
             }
             spriteBatch.End();
+
+
         } 
         #endregion
     }
