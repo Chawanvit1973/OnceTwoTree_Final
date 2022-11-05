@@ -30,9 +30,14 @@ namespace OnceTwoTree_game1
 
         private KeyboardState _currentKey;
         private KeyboardState _oldKey;
-       
+        //time Count
         float totalElapsed;
         float timePerFrame;
+
+        public float energy;
+        float totalTime;
+        float maxTime;
+
 
         public int Gfroce = 10;
 
@@ -45,7 +50,7 @@ namespace OnceTwoTree_game1
         public bool wallCheckLeft, wallCheckRight;
         public bool onClimb;
         public bool leftHand;
-
+        public bool firstCheck = false;
         public int triggerSpeed = 10;
         int framePopup = 0;
         int frameInsideBar = 0;
@@ -55,7 +60,8 @@ namespace OnceTwoTree_game1
         //0 = can't press 1 = can press
         int leftHandOn = 0;
         int rightHandOn = 0;
-        
+
+        Rectangle triggerRec, barRec, dropRec, scLRec, scRRec;
 
         #region SkillCheck var
         public Vector2 barPos, leftHandPos, rightHandPos,triggerPos,insideBarPos,dropBarPos,checkBarPosL,checkBarPosR;
@@ -79,6 +85,11 @@ namespace OnceTwoTree_game1
             
             totalElapsed = 0;
             timePerFrame = 1;
+            //energy config
+            totalTime = 0;
+            maxTime = 0.5f;
+            energy = 100;
+
             wallCheckLeft = wallCheckRight = false;
             isFlip = false;
             leftHand = false;
@@ -91,14 +102,14 @@ namespace OnceTwoTree_game1
             PlayerControl(gameTime);
 
             //Rectangle
-            Rectangle triggerRec = new Rectangle((int)triggerPos.X, (int)triggerPos.Y, (int)(UI_check.Width / 3), (int)(UI_check.Height));
-            Rectangle barRec = new Rectangle((int)insideBarPos.X, (int)insideBarPos.Y, (int)(UI_insidebar.Width), (int)(UI_insidebar.Height/3));
-            Rectangle dropRec = new Rectangle((int)dropBarPos.X, (int)dropBarPos.Y, (int)(UI_check.Width / 3 * dropBarScale.X), (int)(UI_check.Height * dropBarScale.Y));
-            Rectangle scLRec = new Rectangle((int)checkBarPosL.X, (int)checkBarPosL.Y, (int)(UI_check.Width/3 * checkBarScaleL.X), (int)(UI_check.Height * checkBarScaleL.Y));
-            Rectangle scRRec = new Rectangle((int)checkBarPosR.X, (int)checkBarPosR.Y, (int)(UI_check.Width / 3 * checkBarScaleR.X), (int)(UI_check.Height * checkBarScaleR.Y));
+            triggerRec = new Rectangle((int)triggerPos.X, (int)triggerPos.Y, (int)(UI_check.Width / 3), (int)(UI_check.Height));
+            barRec = new Rectangle((int)insideBarPos.X, (int)insideBarPos.Y, (int)(UI_insidebar.Width), (int)(UI_insidebar.Height/3));
+            dropRec = new Rectangle((int)dropBarPos.X, (int)dropBarPos.Y, (int)(UI_check.Width / 3 * dropBarScale.X), (int)(UI_check.Height * dropBarScale.Y));
+            scLRec = new Rectangle((int)checkBarPosL.X, (int)checkBarPosL.Y, (int)(UI_check.Width/3 * checkBarScaleL.X), (int)(UI_check.Height * checkBarScaleL.Y));
+            scRRec = new Rectangle((int)checkBarPosR.X, (int)checkBarPosR.Y, (int)(UI_check.Width / 3 * checkBarScaleR.X), (int)(UI_check.Height * checkBarScaleR.Y));
 
             //CoreGame
-            SkillCheck(gameTime,barRec,triggerRec);
+            //SkillCheck(gameTime,barRec,triggerRec);
 
             //Gfroce
             if (onClimb == false)
@@ -140,7 +151,7 @@ namespace OnceTwoTree_game1
 
             }
             //Draw InteractPopUp
-            if(wallCheckLeft || wallCheckRight && !onClimb)
+            if((wallCheckLeft || wallCheckRight) && !onClimb)
             {
                 spriteBatch.Draw(UI_popup, new Vector2(((RectangleF)Bounds).Position.X+(((RectangleF)Bounds).Size.Width/2-UI_popup.Width/4), ((RectangleF)Bounds).Top - UI_popup.Height), 
                                            new Rectangle(framePopup*UI_popup.Width, 0, UI_popup.Width/2, UI_popup.Height), Color.White);
@@ -169,9 +180,10 @@ namespace OnceTwoTree_game1
                 //Check wall on Right side of Character
                 if (((RectangleF)Bounds).Right >= ((RectangleF)collisionInfo.Other.Bounds).Left &&
                     ((RectangleF)Bounds).Left < ((RectangleF)collisionInfo.Other.Bounds).Left &&
-                    ((RectangleF)Bounds).Bottom - 10 >= ((RectangleF)collisionInfo.Other.Bounds).Top)
+                    ((RectangleF)Bounds).Bottom - 10 >= ((RectangleF)collisionInfo.Other.Bounds).Top &&
+                    ((RectangleF)Bounds).Bottom - 10 <= ((RectangleF)collisionInfo.Other.Bounds).Bottom)
                 {
-                    countW++;
+                    
                     wallCheckRight = true;
                     if (onClimb)
                     {
@@ -190,7 +202,8 @@ namespace OnceTwoTree_game1
                 //Check wall on Left side of Character
                 if (((RectangleF)Bounds).Left <= ((RectangleF)collisionInfo.Other.Bounds).Right &&
                     ((RectangleF)Bounds).Right > ((RectangleF)collisionInfo.Other.Bounds).Right &&
-                    ((RectangleF)Bounds).Bottom - 10 >= ((RectangleF)collisionInfo.Other.Bounds).Top)
+                    ((RectangleF)Bounds).Bottom - 10 >= ((RectangleF)collisionInfo.Other.Bounds).Top &&
+                    ((RectangleF)Bounds).Bottom - 10d <= ((RectangleF)collisionInfo.Other.Bounds).Bottom)
                 {
                     countW++;
                     wallCheckLeft = true;
@@ -236,16 +249,46 @@ namespace OnceTwoTree_game1
             {
                 if (_currentKey.IsKeyDown(Keys.A) && _oldKey.IsKeyUp(Keys.A))
                 {
-                    if (leftHand == true)
+                    if (leftHand == true && triggerRec.Intersects(scLRec) && energy >0)
                     {
-
+                        leftHand = false;
+                        move = new Vector2(0, Velocity) * gameTime.GetElapsedSeconds() * 100;
+                        if (_game.GetCameraPosY() - Bounds.Position.Y <= 864)
+                        {
+                            _game.UpdateCameraY(move);
+                        }
+                        Bounds.Position -= move;
+                    }
+                    if (triggerRec.Intersects(dropRec))
+                    {
+                        move = new Vector2(0, -Velocity) * gameTime.GetElapsedSeconds() * 100;
+                        if (_game.GetCameraPosY() - Bounds.Position.Y <= 864)
+                        {
+                            _game.UpdateCameraY(move);
+                        }
+                        Bounds.Position -= move;
                     }
                 }
                 else if (_currentKey.IsKeyDown(Keys.D) && _oldKey.IsKeyUp(Keys.D))
                 {
-                    if (leftHand == false)
+                    if (leftHand == false && triggerRec.Intersects(scRRec) && energy > 0)
                     {
-
+                        leftHand = true;
+                        move = new Vector2(0, Velocity) * gameTime.GetElapsedSeconds() * 100;
+                        if (_game.GetCameraPosY() - Bounds.Position.Y <= 864)
+                        {
+                            _game.UpdateCameraY(move);
+                        }
+                        Bounds.Position -= move;
+                    }
+                    if (triggerRec.Intersects(dropRec))
+                    {
+                        move = new Vector2(0, -Velocity) * gameTime.GetElapsedSeconds() * 100;
+                        if (_game.GetCameraPosY() - Bounds.Position.Y <= 864)
+                        {
+                            _game.UpdateCameraY(move);
+                        }
+                        Bounds.Position -= move;
                     }
                 }
             }
@@ -312,6 +355,7 @@ namespace OnceTwoTree_game1
             _oldKey = _currentKey;
         } 
         #endregion
+
         #region SkillCheck
         public void SetSkillCheckPos(Vector2 target)
         {
@@ -324,16 +368,16 @@ namespace OnceTwoTree_game1
             //InsideBar
             insideBarPos = new Vector2(barPos.X + 18, barPos.Y + 18);
             //DropCheck
-            dropBarScale = new Vector2(1, 1);
+            dropBarScale = new Vector2(2, 1);
             dropBarPos = new Vector2(insideBarPos.X+UI_insidebar.Width/2-(((UI_check.Width/3)*dropBarScale.X)/2), insideBarPos.Y + 4.6f);
             //LeftCheck
-            checkBarScaleL = new Vector2(1, 1);
+            checkBarScaleL = new Vector2(2, 1);
             checkBarPosL = new Vector2(insideBarPos.X +4.6f, insideBarPos.Y + 4.6f);
             //RightChek
-            checkBarScaleR = new Vector2(1, 1);
-            checkBarPosR = new Vector2(insideBarPos.X + UI_insidebar.Width - UI_check.Width / 3 - 4.6f, insideBarPos.Y + 4.6f);
+            checkBarScaleR = new Vector2(2, 1);
+            checkBarPosR = new Vector2(insideBarPos.X + UI_insidebar.Width - (UI_check.Width / 3 * checkBarScaleR.X)  - 4.6f, insideBarPos.Y + 4.6f);
             //Trigger
-            triggerPos = new Vector2(insideBarPos.X + UI_insidebar.Width / 2 - (((UI_check.Width / 3) * dropBarScale.X) / 2), insideBarPos.Y + 4.6f);
+            //triggerPos = new Vector2(insideBarPos.X + UI_insidebar.Width / 2 - (((UI_check.Width / 3)/ 2), insideBarPos.Y + 4.6f);
         }
 
         public void DrawSkilCheck(SpriteBatch spriteBatch)
@@ -362,21 +406,96 @@ namespace OnceTwoTree_game1
 
         }
 
-        public void SkillCheck(GameTime gameTime, Rectangle barRec,Rectangle triggerRec)
+        public void SkillCheck(GameTime gameTime)
         {
-            countW++;
-            triggerPos.X += triggerSpeed * gameTime.GetElapsedSeconds() * 50;
-            if (triggerRec.Intersects(barRec))
+            if (onClimb)
             {
-                if (triggerRec.Left + triggerSpeed <= barRec.Left ||
-                    triggerRec.Right + triggerSpeed >= barRec.Right)
+                countW++;
+                triggerPos.Y = insideBarPos.Y + 4.6f;
+
+                if ((triggerPos.X < insideBarPos.X || triggerPos.X > insideBarPos.X + UI_insidebar.Width) && firstCheck == false)
                 {
-                    triggerSpeed *= -1;
+                    triggerPos.X = insideBarPos.X + UI_insidebar.Width / 2 - (((UI_check.Width / 3) / 2));
+                    firstCheck = true;
+                }
+                else
+                {
+                    triggerPos.X += triggerSpeed * gameTime.GetElapsedSeconds() * 50;
                 }
 
+                if (triggerRec.Intersects(barRec))
+                {
+                    if (triggerRec.Left + triggerSpeed <= barRec.Left ||
+                        triggerRec.Right + triggerSpeed >= barRec.Right)
+                    {
+                        triggerSpeed *= -1;
+                    }
+
+                }
+                //Hand Stage Set
+                if (leftHand == true)
+                {
+                    leftHandStage = 0;
+                    rightHandStage = 1;
+                }
+                else if (leftHand == false)
+                {
+                    leftHandStage = 1;
+                    rightHandStage = 0;
+                }
+                
+                //Hand ON Set
+                if( leftHand == true && triggerRec.Intersects(scLRec))
+                {
+                    leftHandOn = 1;
+                }
+                else if (leftHand == false && triggerRec.Intersects(scRRec))
+                {
+                    rightHandOn = 1;
+                }
+                else
+                {
+                    rightHandOn = 0;
+                    leftHandOn = 0;
+                }
+            }
+            else if (!onClimb)
+            {
+                firstCheck = false;
+                leftHandStage = 0;
+                rightHandStage = 0;
+                leftHandOn = 0;
+                rightHandOn = 0;
+            }
+   
+        }
+        public void Energy(float time)
+        {
+            totalTime += time;
+            if (totalTime > maxTime)
+            {
+                energy = energy + 1;
+                totalTime -= maxTime;
             }
 
-        } 
+            if (energy > 100)
+            {
+                energy--;
+            }
+            else if (energy <= 0)
+            {
+                energy = 0;
+            }
+            else if (energy >= 50)
+            {
+                maxTime = 0.5f;
+            }
+            else if (energy < 50)
+            {
+                maxTime = 0.1f;
+            }
+
+        }
         #endregion
     }
 }
