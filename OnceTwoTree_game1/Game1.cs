@@ -349,7 +349,7 @@ namespace OnceTwoTree_game1
             //hook update
 
             _oldKey = _currentKey;
-            HookBox.Update_Hook_Hitblock(_entities);
+            HookBox.Update_Hook_Hitblock(_collisionComponent);
         }
 
 
