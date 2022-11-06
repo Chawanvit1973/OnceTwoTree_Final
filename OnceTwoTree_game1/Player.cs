@@ -23,6 +23,8 @@ namespace OnceTwoTree_game1
         public abstract void Update(GameTime gameTime);
     }
 
+    /*////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+
     internal class HookBox : IEntity
     {
 
@@ -36,12 +38,21 @@ namespace OnceTwoTree_game1
         bool _ishooking = false;
         public double _myTime = 0.0;
 
-        Player myPlayer;
+        internal Player myPlayer;
 
-        static List<Player> _PlayerControl = new List<Player>();
+        public static List<Player> _PlayerControl = new List<Player>();
         public static List<HookBox> _Hookboxes = new List<HookBox>();
 
+        /*////////////////////////////////////////////////////////////////////////////*/
 
+
+        //ไว้ใช้เซ็ตInputเชือก
+
+        Keys player1_input = Keys.E;
+        Keys player2_input = Keys.NumPad4;
+
+
+        /*////////////////////////////////////////////////////////////////////////////*/
 
         internal HookBox(Game1 game, IShapeF myShape)
         {
@@ -61,7 +72,8 @@ namespace OnceTwoTree_game1
         public static HookBox LoadHookToPlayer(Player _mPlayer, Game1 game)
         {
             _PlayerControl.Add(_mPlayer);
-            _Hookboxes.Add(new HookBox(game, new RectangleF(Point2.Zero, new Size2(54, 54))));
+            _Hookboxes.Add(new HookBox(game, new RectangleF(Point2.Zero, new Size2(50, 10))));
+            _Hookboxes[_Hookboxes.Count - 1].myPlayer = _mPlayer;
             return _Hookboxes[_Hookboxes.Count - 1];
         }
 
@@ -75,16 +87,15 @@ namespace OnceTwoTree_game1
             KeyboardState keyboard = Keyboard.GetState();
 
             #region ThrowingPlayer1
-            if ((keyboard.IsKeyDown(Keys.E) && (_Hookboxes[0].throw_state == throwing_state.idle)) || _Hookboxes[0].throw_state == throwing_state.startthrow) // สำหรับ player 1 แม้จะมี player แค่คนเดียว
+            if ((keyboard.IsKeyDown(player1_input) && (_Hookboxes[0].throw_state == throwing_state.idle)) || _Hookboxes[0].throw_state == throwing_state.startthrow) // สำหรับ player 1 แม้จะมี player แค่คนเดียว
             {
                 if (_Hookboxes[0].throw_state != throwing_state.throwing)
                 {
                     //อาจจะ set Animate ไว้ตรงนี้ก็ได้
                 }
 
-                if (_oldkey.IsKeyUp(Keys.E) && (_Hookboxes[0].throw_state == throwing_state.idle))
+                if (_oldkey.IsKeyUp(player1_input) && (_Hookboxes[0].throw_state == throwing_state.idle))
                 {
-                    myPlayer = _PlayerControl[0];
                     _Hookboxes[0].throw_state = throwing_state.startthrow;
                     _Hookboxes[0].ThrowHook(gameTime);
                 }
@@ -105,9 +116,45 @@ namespace OnceTwoTree_game1
             else if (_Hookboxes[0].throw_state == throwing_state.finalthrow)
             {
                 _Hookboxes[0].ThrowHook(gameTime);
-                throw_state = throwing_state.idle;
+                _Hookboxes[0].throw_state = throwing_state.idle;
             }
             #endregion
+            
+            #region ThrowingPlayer2
+            if ((keyboard.IsKeyDown(player2_input) && (_Hookboxes[1].throw_state == throwing_state.idle)) || _Hookboxes[1].throw_state == throwing_state.startthrow) // สำหรับ player 2 แม้จะมี player แค่คนเดียว
+            {
+                if (_Hookboxes[1].throw_state != throwing_state.throwing)
+                {
+                    //อาจจะ set Animate ไว้ตรงนี้ก็ได้
+                }
+
+                if (_oldkey.IsKeyUp(player2_input) && (_Hookboxes[1].throw_state == throwing_state.idle))
+                {
+                    _Hookboxes[1].throw_state = throwing_state.startthrow;
+                    _Hookboxes[1].ThrowHook(gameTime);
+                }
+
+                else if (_Hookboxes[1].throw_state == throwing_state.startthrow)
+                {
+                    _Hookboxes[1].throw_state = throwing_state.throwing;
+                    _Hookboxes[1].ThrowHook(gameTime);
+                }
+
+            }
+
+            else if (_Hookboxes[1].throw_state == throwing_state.throwing)
+            {
+                _Hookboxes[1].ThrowHook(gameTime);
+            }
+
+            else if (_Hookboxes[1].throw_state == throwing_state.finalthrow)
+            {
+                _Hookboxes[1].ThrowHook(gameTime);
+                _Hookboxes[1].throw_state = throwing_state.idle;
+            }
+            #endregion
+
+
 
             _oldkey = keyboard;
         }
@@ -127,9 +174,9 @@ namespace OnceTwoTree_game1
                 float ropeThickness = 10;
                 float ropeJoint = 10;
 
-                for (int i = 0; i <= (int)(distancerope - ropeJoint); i += (int)ropeJoint)
+                for (int i = 0; i <= (int)(distancerope - ropeJoint + ((168 + ropeThickness) * 0.5)); i += (int)ropeJoint)
                 {
-                    Rectangle Start = new Rectangle((int)(myPlayer.Bounds.Position.X + ((108 + ropeJoint) * 0.5)), (int)(myPlayer.Bounds.Position.Y + (i * Math.Sin(-Math.PI / 2.0)) /*+ ((168 + ropeThickness) * 0.5)*/), (int)ropeJoint, (int)ropeThickness);
+                    Rectangle Start = new Rectangle((int)(myPlayer.Bounds.Position.X + ((108 + ropeJoint) * 0.5)), (int)(myPlayer.Bounds.Position.Y + (i * Math.Sin(-Math.PI / 2.0)) + ((168 + ropeThickness) * 0.5)), (int)ropeJoint, (int)ropeThickness);
                     spriteBatch.Draw(this._RopeTexture, Start, null, Color.White, (float)(Math.PI / 2.0), new Vector2(0, ropeThickness * 0.5f), 0, 0);
                 }
             }
@@ -152,13 +199,15 @@ namespace OnceTwoTree_game1
 
             if (throw_state == throwing_state.throwing)
             {
-                double distance = 0, startValo = 0, time = _myTime, gavity = 3000;
+                double distance = 0, startValo = 0, time = _myTime, gavity = 1800;
 
                 startValo = -Math.Sqrt(2 * gavity * this.distance);
                 distance = (startValo * time) + ((0.5) * gavity * Math.Pow(time, 2));
                 this.Bounds.Position = new Vector2(this.myPlayer.Bounds.Position.X, this.myPlayer.Bounds.Position.Y + (float)distance);
 
-                if (distance > -10)
+                float tempsize = ((RectangleF)Bounds).Height;
+
+                if (distance > - tempsize * 4 && _myTime > 0.5)
                 {
                     throw_state = throwing_state.finalthrow;
                 }
@@ -166,7 +215,7 @@ namespace OnceTwoTree_game1
                 _myTime += _mTimimg.GetElapsedSeconds();
             }
 
-            if (throw_state == throwing_state.finalthrow)
+            if (throw_state == throwing_state.finalthrow || throw_state == throwing_state.idle)
             {
                 _myTime = 0;
             }

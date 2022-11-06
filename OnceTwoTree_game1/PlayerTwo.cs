@@ -11,14 +11,14 @@ using MonoGame.Extended.Collisions;
 
 namespace OnceTwoTree_game1
 {
-    public class PlayerTwo : IEntity
+    public class PlayerTwo : Player
     {
         private readonly Game1 _game;
 
         public int Velocity = 10;
         Vector2 move;
 
-        public IShapeF Bounds { get; }
+        public override IShapeF Bounds { get; }
 
         protected Texture2D P_idle, P_climb, P_walk, P_fall;
         protected Texture2D UI_stamina;
@@ -52,7 +52,6 @@ namespace OnceTwoTree_game1
         float totalTime;
         float maxTime;
         #endregion
-
 
 
         internal HookBox myhook;
@@ -132,14 +131,12 @@ namespace OnceTwoTree_game1
             leftHand = false;
             onAir = false;
 
-
-
-            //HookBox.LoadHookToPlayer(this, this._game);
+            this.myhook = HookBox.LoadHookToPlayer(this, this._game);
 
         }
 
 
-        public virtual void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             PlayerControl(gameTime);
 
@@ -206,10 +203,12 @@ namespace OnceTwoTree_game1
             }
             UpdateFrame((float)gameTime.ElapsedGameTime.TotalSeconds);
 
+            //hook
+            myhook.Update(gameTime);
 
         }
 
-        public virtual void Draw(SpriteBatch spriteBatch)
+        public override void Draw(SpriteBatch spriteBatch)
         {
             if (!isFlip)
             {
@@ -274,10 +273,13 @@ namespace OnceTwoTree_game1
             }
             DrawSkilCheck(spriteBatch);
             spriteBatch.DrawRectangle((RectangleF)Bounds, Color.Red, 3f);
+
+            //HookDraw
+            myhook.Draw(spriteBatch);
             
         }
 
-        public void OnCollision(CollisionEventArgs collisionInfo)
+        public override void OnCollision(CollisionEventArgs collisionInfo)
         {
             countC++;
             //Platform Collision

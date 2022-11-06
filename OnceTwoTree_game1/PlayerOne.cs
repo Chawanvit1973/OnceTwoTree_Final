@@ -131,7 +131,7 @@ namespace OnceTwoTree_game1
             leftHand = false;
             onAir = false;
 
-            myhook = HookBox.LoadHookToPlayer(this, this._game);
+            this.myhook = HookBox.LoadHookToPlayer(this, this._game);
            
         }
 
@@ -275,7 +275,7 @@ namespace OnceTwoTree_game1
             spriteBatch.DrawRectangle((RectangleF)Bounds, Color.Red, 3f);
 
             //HookDraw
-            this.myhook.Draw(spriteBatch);
+            myhook.Draw(spriteBatch);
         }
         
         public override void OnCollision(CollisionEventArgs collisionInfo)
@@ -340,6 +340,8 @@ namespace OnceTwoTree_game1
                 }
                 else { wallCheckLeft = false; }
             }
+            
+            
             else { wallCheckRight = false; wallCheckLeft = false; } 
             #endregion
 
