@@ -40,6 +40,7 @@ namespace OnceTwoTree_game1
 
         TiledMapObjectLayer _platformTiledObj;
         TiledMapObjectLayer _climbObj;
+        TiledMapObjectLayer _hookpointObj;
         TiledMapTileLayer _bgLayer;
         TiledMapTileLayer _towerLayer;
         TiledMapTileLayer _platformLayer;
@@ -122,6 +123,10 @@ namespace OnceTwoTree_game1
                 {
                     _climbObj = layer;
                 }
+                if(layer.Name == "HookPointObject")
+                {
+                    _hookpointObj = layer;
+                }
             }
 
             foreach (TiledMapTileLayer tLayer in _tiledMap.TileLayers)
@@ -156,6 +161,11 @@ namespace OnceTwoTree_game1
             {
                 Point2 position = new Point2(obj.Position.X, obj.Position.Y);
                 _entities.Add(new ClimbOBJ(this, new RectangleF(position, obj.Size)));
+            }
+            foreach(TiledMapObject obj in _hookpointObj.Objects)
+            {
+                Point2 position = new Point2(obj.Position.X, obj.Position.Y);
+                _entities.Add(new HookPointObject(this, new RectangleF(position, obj.Size)));
             }
 
             #endregion
@@ -415,7 +425,7 @@ namespace OnceTwoTree_game1
                     spriteBatch.DrawString(font, "Dcount = " + (playerInstance1.timeCount - playerInstance1.countG), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 250), Color.Black);
                     spriteBatch.DrawString(font, "FirstCheck = " + (playerInstance1.firstCheck), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 270), Color.Black);
                     spriteBatch.DrawString(font, "Energy = " + (playerInstance1.energy), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 290), Color.Black);
-                    spriteBatch.DrawString(font, "Throwstate = " + (HookBox._Hookboxes[0]._myTime), new Vector2(_panelPos1.X + 270, _panelPos1.Y + 290), Color.Black);
+                    spriteBatch.DrawString(font, "Throwstate = " + (playerInstance1.myhook._myTime), new Vector2(_panelPos1.X + 270, _panelPos1.Y + 290), Color.Black);
 
                 }
 
@@ -453,7 +463,7 @@ namespace OnceTwoTree_game1
                     spriteBatch.DrawString(font, "Dcount = " + (playerInstance2.timeCount - playerInstance2.countG), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 250), Color.Black);
                     spriteBatch.DrawString(font, "FirstCheck = " + (playerInstance2.firstCheck), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 270), Color.Black);
                     spriteBatch.DrawString(font, "Energy = " + (playerInstance2.energy), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 290), Color.Black);
-                    spriteBatch.DrawString(font, "Throwstate = " + (HookBox._Hookboxes[1]._myTime), new Vector2(_panelPos2.X + 270, _panelPos2.Y + 290), Color.Black);
+                    spriteBatch.DrawString(font, "Throwstate = " + (playerInstance2.myhook._myTime), new Vector2(_panelPos2.X + 270, _panelPos2.Y + 290), Color.Black);
 
                 }
             }
