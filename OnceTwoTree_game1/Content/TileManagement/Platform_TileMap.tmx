@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="42" height="40" tilewidth="108" tileheight="108" infinite="0" nextlayerid="12" nextobjectid="28">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="42" height="40" tilewidth="108" tileheight="108" infinite="0" nextlayerid="12" nextobjectid="29">
  <tileset firstgid="1" source="Background_TileSet.tsx"/>
  <tileset firstgid="145" source="Platform_TileSet.tsx"/>
  <tileset firstgid="241" source="Tileset_Decorate_TileSet.tsx"/>
@@ -187,6 +187,7 @@
    <object id="36" x="2582.5" y="215.5" width="117.5" height="108"/>
    <object id="37" x="2582.5" y="1188.5" width="117" height="107"/>
    <object id="39" x="2583" y="2052.5" width="116.5" height="107"/>
+   <object id="28" x="2488" y="802"/>
   </objectgroup>
   <objectgroup id="5" name="PlatformObject">
    <object id="5" x="2565.67" y="3245.33" width="452" height="431"/>
