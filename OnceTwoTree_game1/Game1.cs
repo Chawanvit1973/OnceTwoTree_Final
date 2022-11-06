@@ -21,8 +21,8 @@ namespace OnceTwoTree_game1
         private SpriteBatch spriteBatch;
 
         public GameTime gametimeUse;
-        private const int MapWidth = 4536;
-        private const int MapHeight = 4320;
+        private const int MapWidth = 5616;
+        private const int MapHeight = 6480;
 
         public static OrthographicCamera _camera1, _camera2;
         public static Vector2 _cameraPosition1, _cameraPosition2;
@@ -42,13 +42,20 @@ namespace OnceTwoTree_game1
         TiledMapObjectLayer _platformTiledObj;
         TiledMapObjectLayer _climbObj;
         TiledMapObjectLayer _hookpointObj;
+        TiledMapObjectLayer _webObj;
+        TiledMapObjectLayer _brokenObj;
         TiledMapTileLayer _bgLayer;
-        TiledMapTileLayer _towerLayer;
+        TiledMapTileLayer _midgroundLayer;
         TiledMapTileLayer _platformLayer;
         TiledMapTileLayer _hookLayer;
+        TiledMapTileLayer _dec1Layer;
+        TiledMapTileLayer _dec2Layer;
+        TiledMapTileLayer _towerLayer;
 
-        bool openConfig1 = true;
-        bool openConfig2 = true;
+
+
+        bool openConfig1 = false;
+        bool openConfig2 = false;
 
 
         PlayerOne playerInstance1;
@@ -56,6 +63,10 @@ namespace OnceTwoTree_game1
 
         bool isGameplay;
         bool isMenu;
+
+        float totalElapsed;
+        float timePerframe;
+        int frame = 0;
 
         private KeyboardState _currentKey;
         private KeyboardState _oldKey;
@@ -77,6 +88,8 @@ namespace OnceTwoTree_game1
 
         protected override void Initialize()
         {
+            
+
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             //Set DefaultView
             defaultView = graphics.GraphicsDevice.Viewport;
@@ -111,6 +124,10 @@ namespace OnceTwoTree_game1
             //Load Menu
             menu = Content.Load<Texture2D>("Resources\\Title\\TitleScene");
 
+            totalElapsed = 0;
+            timePerframe = 0.3f;
+            
+
             #region find & Create OBJ
             //Getting
             //Get Obj layers
@@ -124,9 +141,17 @@ namespace OnceTwoTree_game1
                 {
                     _climbObj = layer;
                 }
-                if(layer.Name == "HookPointObject")
+                if (layer.Name == "HookPointObject")
                 {
                     _hookpointObj = layer;
+                }
+                if(layer.Name == "BrokenObject")
+                {
+                    _brokenObj = layer;
+                }
+                if(layer.Name == "WebObject")
+                {
+                    _webObj = layer;
                 }
             }
 
@@ -138,7 +163,7 @@ namespace OnceTwoTree_game1
                 }
                 if (tLayer.Name == "Midground")
                 {
-                    _towerLayer = tLayer;
+                    _midgroundLayer = tLayer;
                 }
                 if (tLayer.Name == "Platform")
                 {
@@ -147,6 +172,18 @@ namespace OnceTwoTree_game1
                 if(tLayer.Name == "HookPoint")
                 {
                     _hookLayer = tLayer;
+                }
+                if(tLayer.Name == "Dec2")
+                {
+                    _dec2Layer = tLayer;
+                }
+                if (tLayer.Name == "Decorate")
+                {
+                    _dec1Layer = tLayer;
+                }
+                if(tLayer.Name == "Tower")
+                {
+                    _towerLayer = tLayer;
                 }
             }
 
@@ -163,12 +200,21 @@ namespace OnceTwoTree_game1
                 Point2 position = new Point2(obj.Position.X, obj.Position.Y);
                 _entities.Add(new ClimbOBJ(this, new RectangleF(position, obj.Size)));
             }
-            foreach(TiledMapObject obj in _hookpointObj.Objects)
+            foreach (TiledMapObject obj in _hookpointObj.Objects)
             {
                 Point2 position = new Point2(obj.Position.X, obj.Position.Y);
                 _entities.Add(new HookPointObject(this, new RectangleF(position, obj.Size)));
             }
-
+            foreach (TiledMapObject obj in _webObj.Objects)
+            {
+                Point2 position = new Point2(obj.Position.X, obj.Position.Y);
+                _entities.Add(new WebOBJ(this, new RectangleF(position, obj.Size)));
+            }
+            foreach (TiledMapObject obj in _brokenObj.Objects)
+            {
+                Point2 position = new Point2(obj.Position.X, obj.Position.Y);
+                _entities.Add(new BrokenOBJ(this, new RectangleF(position, obj.Size)));
+            }
             #endregion
 
             //Setup Player
@@ -198,18 +244,21 @@ namespace OnceTwoTree_game1
 
         protected override void Update(GameTime gameTime)
         {
-            InGameUpdate(gameTime);
 
             if (isMenu == true)
             {
-                UpdateMenu();
+                UpdateMenu(gameTime);
+
             }
             else if (isGameplay == true)
             {
                 UpdateGameplay();
+                InGameUpdate(gameTime);
             }
+            UpdateFrame((float)gameTime.ElapsedGameTime.TotalSeconds);
 
             base.Update(gameTime);
+
         }
 
         protected override void Draw(GameTime gameTime)
@@ -224,7 +273,6 @@ namespace OnceTwoTree_game1
             {
                 DrawGameplay();
             }
-
             //InGameDraw();
 
             base.Draw(gameTime);
@@ -329,7 +377,7 @@ namespace OnceTwoTree_game1
                     openConfig1 = true;
                 }
             }
-
+            //Open Panel2
             if (_currentKey.IsKeyDown(Keys.NumPad2) && _oldKey.IsKeyUp(Keys.NumPad2))
             {
 
@@ -362,7 +410,7 @@ namespace OnceTwoTree_game1
             _camera2.LookAt(_bgPosition2 + _cameraPosition2);
             playerInstance2.SetSkillCheckPos(_camera2.Position);
             playerInstance2.SkillCheck(gameTime);
-            _panelPos2 = new Vector2(_camera2.Position.X +50, _camera2.Position.Y +50);
+            _panelPos2 = new Vector2(_camera2.Position.X + 864 -(5*108) , _camera2.Position.Y + graphics.PreferredBackBufferHeight - (3*108));
             _oldKey = _currentKey;
 
             //hook update
@@ -371,7 +419,7 @@ namespace OnceTwoTree_game1
 
 
         #region Scene Manage
-        public void UpdateMenu()
+        public void UpdateMenu(GameTime gameTime)
         {
             if (Mouse.GetState().LeftButton == ButtonState.Pressed)
             {
@@ -383,6 +431,7 @@ namespace OnceTwoTree_game1
                 isMenu = false;
                 isGameplay = true;
             }
+            
         }
         public void UpdateGameplay()
         {
@@ -402,7 +451,7 @@ namespace OnceTwoTree_game1
             GraphicsDevice.Viewport = defaultView;
             spriteBatch.Begin();
 
-            spriteBatch.Draw(menu, Vector2.Zero, new Rectangle(0, 0, menu.Width / 2, menu.Height), Color.White);
+            spriteBatch.Draw(menu, Vector2.Zero, new Rectangle(menu.Width/2 * frame, 0, menu.Width / 2, menu.Height), Color.White);
 
             spriteBatch.End();
         }
@@ -411,8 +460,11 @@ namespace OnceTwoTree_game1
             GraphicsDevice.Viewport = leftView;
             var transformMatrix1 = _camera1.GetViewMatrix();
             _tiledMapRenderer.Draw(_bgLayer, transformMatrix1);
+            _tiledMapRenderer.Draw(_midgroundLayer, transformMatrix1);
             _tiledMapRenderer.Draw(_towerLayer, transformMatrix1);
             _tiledMapRenderer.Draw(_platformLayer, transformMatrix1);
+            _tiledMapRenderer.Draw(_dec1Layer, transformMatrix1);
+            _tiledMapRenderer.Draw(_dec2Layer, transformMatrix1);  
             _tiledMapRenderer.Draw(_hookLayer, transformMatrix1);
             spriteBatch.Begin(transformMatrix: transformMatrix1);
 
@@ -425,8 +477,8 @@ namespace OnceTwoTree_game1
                     spriteBatch.DrawString(font, "Player Pos = " + playerInstance1.Bounds.Position, new Vector2(_panelPos1.X + 10, _panelPos1.Y + 10), Color.Black);
                     spriteBatch.DrawString(font, "Camera.Pos = " + _camera1.Position, new Vector2(_panelPos1.X + 10, _panelPos1.Y + 30), Color.Black);
                     spriteBatch.DrawString(font, "CameraPosition = " + _cameraPosition1, new Vector2(_panelPos1.X + 10, _panelPos1.Y + 50), Color.Black);
-                    spriteBatch.DrawString(font, "DcamX = " + (playerInstance1.Bounds.Position.X - _cameraPosition1.X), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 70), Color.Black);
-                    spriteBatch.DrawString(font, "Player Stage= " + (playerInstance1.p_stateNum), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 90), Color.Black);
+                    spriteBatch.DrawString(font, "Hight = " + (MapHeight - playerInstance1.Bounds.Position.Y), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 70), Color.Black);
+                    spriteBatch.DrawString(font, "P1 onground= " + (playerInstance1.onGround), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 90), Color.Black);
                     spriteBatch.DrawString(font, "Wall Check R= " + (playerInstance1.wallCheckRight), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 110), Color.Black);
                     spriteBatch.DrawString(font, "Wall Check L = " + (playerInstance1.wallCheckLeft), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 130), Color.Black);
                     spriteBatch.DrawString(font, "Climb = " + (playerInstance1.onClimb), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 150), Color.Black);
@@ -435,7 +487,7 @@ namespace OnceTwoTree_game1
                     spriteBatch.DrawString(font, "CountC = " + (playerInstance1.countC), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 210), Color.Black);
                     spriteBatch.DrawString(font, "oldCount = " + (playerInstance1.timeCount), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 230), Color.Black);
                     spriteBatch.DrawString(font, "Dcount = " + (playerInstance1.timeCount - playerInstance1.countG), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 250), Color.Black);
-                    spriteBatch.DrawString(font, "FirstCheck = " + (playerInstance1.firstCheck), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 270), Color.Black);
+                    spriteBatch.DrawString(font, "TrggerSpeed = " + (playerInstance1.triggerSpeed), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 270), Color.Black);
                     spriteBatch.DrawString(font, "Energy = " + (playerInstance1.energy), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 290), Color.Black);
                     spriteBatch.DrawString(font, "Throwstate = " + (playerInstance1.myhook._ishooking), new Vector2(_panelPos1.X + 270, _panelPos1.Y + 290), Color.Black);
                     spriteBatch.DrawString(font, "Throwstate = " + (HookBox._Hookboxes[0]._ishooking), new Vector2(_panelPos1.X + 270, _panelPos1.Y + 270), Color.Black);
@@ -448,8 +500,11 @@ namespace OnceTwoTree_game1
             GraphicsDevice.Viewport = rightView;
             var transformMatrix2 = _camera2.GetViewMatrix();
             _tiledMapRenderer.Draw(_bgLayer, transformMatrix2);
+            _tiledMapRenderer.Draw(_midgroundLayer, transformMatrix2);
             _tiledMapRenderer.Draw(_towerLayer, transformMatrix2);
             _tiledMapRenderer.Draw(_platformLayer, transformMatrix2);
+            _tiledMapRenderer.Draw(_dec1Layer, transformMatrix2);
+            _tiledMapRenderer.Draw(_dec2Layer, transformMatrix2);
             _tiledMapRenderer.Draw(_hookLayer, transformMatrix2);
             spriteBatch.Begin(transformMatrix: transformMatrix2);
 
@@ -486,5 +541,14 @@ namespace OnceTwoTree_game1
 
         }
         #endregion
+        public void UpdateFrame(float elapsed)
+        {
+            totalElapsed += elapsed;
+            if (totalElapsed > timePerframe)
+            {
+                frame = (frame + 1) % 2;
+                totalElapsed -= timePerframe;
+            }
+        }
     }
 }

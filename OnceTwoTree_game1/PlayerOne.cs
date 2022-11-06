@@ -61,16 +61,20 @@ namespace OnceTwoTree_game1
 
         public float timeCount = 0;
         public float countG = 0;
-        public int countW = 0;
+        public float countW = 0;
         public int countC = 0;
 
         public bool onAir;
+        public bool onGround;
         public bool isFlip;
         public bool wallCheckLeft, wallCheckRight;
         public bool onClimb;
         public bool leftHand;
         public bool firstCheck = false;
-        public int triggerSpeed = 10;
+        public int triggerSpeed = 15;
+        public bool onWeb = false;
+        public bool onBroken = false;
+
         int framePopup = 0;
         int frameInsideBar = 0;
         //Hand stage var 0 = แบมือ 1 = กำมือ
@@ -139,7 +143,6 @@ namespace OnceTwoTree_game1
         public override void Update(GameTime gameTime)
         {
             PlayerControl(gameTime);
-
             //Rectangle
             triggerRec = new Rectangle((int)triggerPos.X, (int)triggerPos.Y, (int)(UI_check.Width / 3), (int)(UI_check.Height));
             barRec = new Rectangle((int)insideBarPos.X, (int)insideBarPos.Y, (int)(UI_insidebar.Width), (int)(UI_insidebar.Height / 3));
@@ -161,7 +164,7 @@ namespace OnceTwoTree_game1
 
             //Time Count
             TimeCount((float)gameTime.ElapsedGameTime.TotalSeconds);
-            if (timeCount - countG >= 1f)
+            if(timeCount - countG >0.5f)
             {
                 onAir = true;
             }
@@ -173,10 +176,12 @@ namespace OnceTwoTree_game1
                 if (wallCheckLeft) { wallCheckLeft = false; }
                 if (wallCheckRight) { wallCheckRight = false; }
                 p_stateNum = 3;
-            }
 
+            }
+            
+            if(timeCount > 100) { timeCount = 1; }
             //Debug
-            if (countW > 10) { countW = 0; }
+           
             if (countC > 10) { countC = 0; }
 
             //Energy
@@ -208,6 +213,7 @@ namespace OnceTwoTree_game1
 
         }
 
+        
         public override void Draw(SpriteBatch spriteBatch)
         {
             if (!isFlip)
@@ -311,7 +317,26 @@ namespace OnceTwoTree_game1
 
                 }
             }
-
+            else if (collisionInfo.Other.ToString().Contains("WebOBJ"))
+            {
+         
+                if (((RectangleF)Bounds).Bottom - 10 >= ((RectangleF)collisionInfo.Other.Bounds).Top &&
+                    ((RectangleF)Bounds).Bottom - 10 <= ((RectangleF)collisionInfo.Other.Bounds).Bottom)
+                {
+                    onWeb = true;
+                }
+                else { onWeb = false; }
+            }
+            else if (collisionInfo.Other.ToString().Contains("BrokenOBJ"))
+            {
+                
+                if (((RectangleF)Bounds).Bottom - 10 >= ((RectangleF)collisionInfo.Other.Bounds).Top &&
+                    ((RectangleF)Bounds).Bottom - 10 <= ((RectangleF)collisionInfo.Other.Bounds).Bottom)
+                {
+                    onBroken = true;
+                }
+                else { onBroken = false; }
+            }
             #region WallCollision
             else if (collisionInfo.Other.ToString().Contains("ClimbOBJ"))
             {
@@ -325,6 +350,7 @@ namespace OnceTwoTree_game1
                     wallCheckRight = true;
                     if (onClimb)
                     {
+                        countW = timeCount;
                         isFlip = false;
                         Bounds.Position = new Vector2(((RectangleF)collisionInfo.Other.Bounds).Position.X - ((RectangleF)collisionInfo.Other.Bounds).Size.Width + 9, Bounds.Position.Y);
                         //End of Climbing
@@ -342,17 +368,18 @@ namespace OnceTwoTree_game1
                         }
                     }
                 }
-                else { wallCheckRight = false; }
+                else { wallCheckRight = false;}
                 //Check wall on Left side of Character
                 if (((RectangleF)Bounds).Left <= ((RectangleF)collisionInfo.Other.Bounds).Right &&
                     ((RectangleF)Bounds).Right > ((RectangleF)collisionInfo.Other.Bounds).Right &&
                     ((RectangleF)Bounds).Bottom - 10 >= ((RectangleF)collisionInfo.Other.Bounds).Top &&
                     ((RectangleF)Bounds).Bottom - 10 <= ((RectangleF)collisionInfo.Other.Bounds).Bottom)
                 {
-                    countW++;
+                    
                     wallCheckLeft = true;
                     if (onClimb)
                     {
+                        countW = timeCount;
                         isFlip = true;
                         Bounds.Position = new Vector2(((RectangleF)collisionInfo.Other.Bounds).Position.X + (((RectangleF)collisionInfo.Other.Bounds).Size.Width * 1 / 3) - 9, Bounds.Position.Y);
                         //End of Climbing
@@ -370,13 +397,12 @@ namespace OnceTwoTree_game1
                         }
                     }
                 }
-                else { wallCheckLeft = false; }
+                else { wallCheckLeft = false;}
             }
-
-
             else { wallCheckRight = false; wallCheckLeft = false; }
             #endregion
 
+            
         }
 
         public void TimeCount(float elapsed)
@@ -428,6 +454,7 @@ namespace OnceTwoTree_game1
             #region A D (Left Right)
             if (onClimb == true)
             {
+                Velocity = 20;
                 p_stateNum = 2;
                 if (_currentKey.IsKeyDown(Keys.A) && _oldKey.IsKeyUp(Keys.A))
                 {
@@ -454,7 +481,12 @@ namespace OnceTwoTree_game1
                             _game.UpdateCamera1Y(move);
                         }
                         Bounds.Position -= move;
+                        if (onBroken)
+                        {
+                            onClimb = false;
+                        }
                     }
+                    
                 }
                 else if (_currentKey.IsKeyDown(Keys.D) && _oldKey.IsKeyUp(Keys.D))
                 {
@@ -481,12 +513,18 @@ namespace OnceTwoTree_game1
                             _game.UpdateCamera1Y(move);
                         }
                         Bounds.Position -= move;
+                        if (onBroken)
+                        {
+                            onClimb = false;
+                        }
                     }
+                   
                 }
             }
             else if (onClimb == false && onAir == false)
             {
-                if (_currentKey.IsKeyDown(Keys.D) && Bounds.Position.X < (_game.GetMapWidth() / 2) - ((RectangleF)Bounds).Width)
+                Velocity = 10;
+                if (_currentKey.IsKeyDown(Keys.D) && Bounds.Position.X < (_game.GetMapWidth()/2) - ((RectangleF)Bounds).Width)
                 {
                     p_stateNum = 1;
                     isFlip = false;
@@ -598,16 +636,21 @@ namespace OnceTwoTree_game1
                 spriteBatch.Draw(UI_check, checkBarPosR, new Rectangle(UI_check.Width * 1 / 3, 0, UI_check.Width / 3, UI_check.Height), Color.White, 0, Vector2.Zero, checkBarScaleR, SpriteEffects.None, 0);
                 //Check Drop
                 spriteBatch.Draw(UI_check, dropBarPos, new Rectangle(UI_check.Width * 0 / 3, 0, UI_check.Width / 3, UI_check.Height), Color.White, 0, Vector2.Zero, dropBarScale, SpriteEffects.None, 0);
+                //Broken
+                if (onBroken)
+                {
+                    spriteBatch.Draw(UI_insidebar, insideBarPos, new Rectangle(0, UI_insidebar.Height * 2 / 3, UI_insidebar.Width, UI_insidebar.Height / 3), Color.White);
+                }
                 //Trigger
                 spriteBatch.Draw(UI_check, triggerPos, new Rectangle(UI_check.Width * 2 / 3, 0, UI_check.Width / 3, UI_check.Height), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
+                if (onWeb)
+                {
+                    spriteBatch.Draw(UI_bar, barPos, new Rectangle(0, UI_bar.Height / 2, UI_bar.Width, UI_bar.Height / 2), Color.White);
+                }
             }
             //Stamina
             spriteBatch.Draw(UI_stamina, staminaPos, new Rectangle(0, 0, UI_stamina.Width, UI_stamina.Height), Color.White);
-            spriteBatch.Draw(UI_energy, new Rectangle((int)energyPos.X, (int)energyPos.Y, UI_energy.Width, (int)energyBar), new Rectangle(0, 0, UI_energy.Width, UI_energy.Height), Color.White);
-            //Web Status
-            //spriteBatch.Draw(UI_bar, barPos, new Rectangle(0, UI_bar.Height/2, UI_bar.Width, UI_bar.Height / 2), Color.White);
-            //Inside
-            //spriteBatch.Draw(UI_insidebar, insideBarPos, new Rectangle(0, UI_insidebar.Height * frameInsideBar / 3, UI_insidebar.Width, UI_insidebar.Height / 3), Color.White);
+            spriteBatch.Draw(UI_energy,new Rectangle((int)energyPos.X,(int)energyPos.Y,UI_energy.Width,(int)energyBar), new Rectangle(0, 0, UI_energy.Width, UI_energy.Height),Color.White);
             //Half
             spriteBatch.Draw(UI_half, halfPos, new Rectangle(0, 0, UI_half.Width / 2, UI_half.Height), Color.White);
 
