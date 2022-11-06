@@ -15,12 +15,15 @@ namespace OnceTwoTree_game1
     {
 
         internal HookBox myhook;
+        internal bool onClimb;
 
         public abstract IShapeF Bounds { get; }
 
         public abstract void Draw(SpriteBatch spriteBatch);
         public abstract void OnCollision(CollisionEventArgs collisionInfo);
         public abstract void Update(GameTime gameTime);
+
+        public abstract bool GetOnClimb();
     }
 
     /*////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
@@ -35,7 +38,7 @@ namespace OnceTwoTree_game1
         Texture2D _RopeTexture; // รอimportรูปเชือก
         Texture2D _RopeTexture_Test;
 
-        bool _ishooking = false;
+        public bool _ishooking = false;
         public double _myTime = 0.0;
 
         internal Player myPlayer;
@@ -72,7 +75,7 @@ namespace OnceTwoTree_game1
         public static HookBox LoadHookToPlayer(Player _mPlayer, Game1 game)
         {
             _PlayerControl.Add(_mPlayer);
-            _Hookboxes.Add(new HookBox(game, new RectangleF(Point2.Zero, new Size2(50, 10))));
+            _Hookboxes.Add(new HookBox(game, new RectangleF(Point2.Zero, new Size2(50, 20))));
             _Hookboxes[_Hookboxes.Count - 1].myPlayer = _mPlayer;
             return _Hookboxes[_Hookboxes.Count - 1];
         }
@@ -87,7 +90,7 @@ namespace OnceTwoTree_game1
             KeyboardState keyboard = Keyboard.GetState();
 
             #region ThrowingPlayer1
-            if ((keyboard.IsKeyDown(player1_input) && (_Hookboxes[0].throw_state == throwing_state.idle)) || _Hookboxes[0].throw_state == throwing_state.startthrow) // สำหรับ player 1 แม้จะมี player แค่คนเดียว
+            if ((keyboard.IsKeyDown(player1_input) && (_Hookboxes[0].throw_state == throwing_state.idle) && _PlayerControl[0].GetOnClimb()) || _Hookboxes[0].throw_state == throwing_state.startthrow) // สำหรับ player 1 แม้จะมี player แค่คนเดียว
             {
                 if (_Hookboxes[0].throw_state != throwing_state.throwing)
                 {
@@ -119,9 +122,9 @@ namespace OnceTwoTree_game1
                 _Hookboxes[0].throw_state = throwing_state.idle;
             }
             #endregion
-            
+
             #region ThrowingPlayer2
-            if ((keyboard.IsKeyDown(player2_input) && (_Hookboxes[1].throw_state == throwing_state.idle)) || _Hookboxes[1].throw_state == throwing_state.startthrow) // สำหรับ player 2 แม้จะมี player แค่คนเดียว
+            if ((keyboard.IsKeyDown(player2_input) && (_Hookboxes[1].throw_state == throwing_state.idle) && _PlayerControl[1].GetOnClimb()) || _Hookboxes[1].throw_state == throwing_state.startthrow) // สำหรับ player 2 แม้จะมี player แค่คนเดียว
             {
                 if (_Hookboxes[1].throw_state != throwing_state.throwing)
                 {
@@ -159,6 +162,18 @@ namespace OnceTwoTree_game1
             _oldkey = keyboard;
         }
 
+        public HookBox UpdateMe(GameTime gametime, Player player)
+        {
+            myPlayer = player;
+
+            for(int i = 0; i <=1; i++)
+            {
+                _Hookboxes[i].myPlayer = _PlayerControl[i];
+            }
+
+            this.Update(gametime);
+            return this;
+        }
 
         public virtual void Draw(SpriteBatch spriteBatch)
         {
@@ -185,38 +200,87 @@ namespace OnceTwoTree_game1
         public void OnCollision(CollisionEventArgs collisionInfo)
         {
 
+            if (collisionInfo.Other.ToString().Contains("HookPointObject"))
+            {
+                if (((RectangleF)Bounds).Bottom > ((RectangleF)collisionInfo.Other.Bounds).Top &&
+                    ((RectangleF)Bounds).Top > ((RectangleF)collisionInfo.Other.Bounds).Top &&
+                    ((RectangleF)Bounds).Bottom < ((RectangleF)collisionInfo.Other.Bounds).Bottom - 20 &&
+                    ((RectangleF)Bounds).Top < ((RectangleF)collisionInfo.Other.Bounds).Bottom - 20 &&
+                    _myTime > 0.6)
+                {
+                    Bounds.Position -= collisionInfo.PenetrationVector;
+                    _ishooking = true;
+                }
+                else if (((RectangleF)Bounds).Bottom <= ((RectangleF)collisionInfo.Other.Bounds).Top &&
+                        ((RectangleF)Bounds).Top < ((RectangleF)collisionInfo.Other.Bounds).Top &&
+                        _myTime > 0.6)
+                {
+                    Bounds.Position -= collisionInfo.PenetrationVector;
+                    _ishooking = true;
+                }
+                else if (_myTime > 0.6) 
+                {
+                    Bounds.Position -= collisionInfo.PenetrationVector;
+                    _ishooking = true; 
+                }
+                else
+                {
+                    _ishooking = false;
+                }
+            }
+            else if (collisionInfo.Other.ToString().Contains("ClimbOBJ"))
+            {
+                if (((RectangleF)Bounds).Top > ((RectangleF)collisionInfo.Other.Bounds).Top &&
+                    ((RectangleF)Bounds).Bottom > ((RectangleF)collisionInfo.Other.Bounds).Bottom)
+                {
+
+                }
+            }
+
         }
 
-        double distance = 108 * 5;
+        double distance = 108 * 4;
 
         public void ThrowHook(GameTime _mTimimg)
         {
             if (throw_state == throwing_state.startthrow)
             {
-                this.Bounds.Position = new Vector2(this.myPlayer.Bounds.Position.X, this.myPlayer.Bounds.Position.Y);
+                this.Bounds.Position = new Vector2(this.myPlayer.Bounds.Position.X + 27, this.myPlayer.Bounds.Position.Y);
                 _myTime += _mTimimg.GetElapsedSeconds();
             }
 
             if (throw_state == throwing_state.throwing)
             {
                 double distance = 0, startValo = 0, time = _myTime, gavity = 1800;
+                double fulldistance = Math.Abs(myPlayer.Bounds.Position.Y - Bounds.Position.Y);
 
-                startValo = -Math.Sqrt(2 * gavity * this.distance);
-                distance = (startValo * time) + ((0.5) * gavity * Math.Pow(time, 2));
-                this.Bounds.Position = new Vector2(this.myPlayer.Bounds.Position.X, this.myPlayer.Bounds.Position.Y + (float)distance);
+                if (!_ishooking)
+                {
+                    startValo = -Math.Sqrt(2 * gavity * this.distance);
+                    distance = (startValo * time) + ((0.5) * gavity * Math.Pow(time, 2));
+                    this.Bounds.Position = new Vector2(this.myPlayer.Bounds.Position.X + 27, this.myPlayer.Bounds.Position.Y + (float)distance);
+                    _myTime += _mTimimg.GetElapsedSeconds();
+                }
+
+                else if (_ishooking)
+                {
+                    startValo = -Math.Sqrt(2 * gavity * this.distance);
+                    distance = (startValo * time) + ((0.5) * gavity * Math.Pow(time, 2));
+                    this.Bounds.Position = Bounds.Position;
+                }
 
                 float tempsize = ((RectangleF)Bounds).Height;
 
-                if (distance > - tempsize * 4 && _myTime > 0.5)
+                if (fulldistance < tempsize * 0.8 && _myTime > 0.5)
                 {
                     throw_state = throwing_state.finalthrow;
                 }
 
-                _myTime += _mTimimg.GetElapsedSeconds();
             }
 
             if (throw_state == throwing_state.finalthrow || throw_state == throwing_state.idle)
             {
+                _ishooking = false;
                 _myTime = 0;
             }
         }
@@ -244,7 +308,6 @@ namespace OnceTwoTree_game1
                 }
             }
         }
-
 
     }
 }

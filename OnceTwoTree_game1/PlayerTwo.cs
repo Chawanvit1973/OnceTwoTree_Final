@@ -83,7 +83,7 @@ namespace OnceTwoTree_game1
         Rectangle triggerRec, barRec, dropRec, scLRec, scRRec;
 
         #region SkillCheck var & Staminabar
-        public Vector2 barPos, leftHandPos, rightHandPos, triggerPos, insideBarPos, dropBarPos, checkBarPosL, checkBarPosR ,halfPos;
+        public Vector2 barPos, leftHandPos, rightHandPos, triggerPos, insideBarPos, dropBarPos, checkBarPosL, checkBarPosR, halfPos;
         public Vector2 dropBarScale, checkBarScaleL, checkBarScaleR;
         public Vector2 staminaPos, energyPos;
         #endregion
@@ -204,7 +204,7 @@ namespace OnceTwoTree_game1
             UpdateFrame((float)gameTime.ElapsedGameTime.TotalSeconds);
 
             //hook
-            myhook.Update(gameTime);
+            myhook = myhook.UpdateMe(gameTime, this);
 
         }
 
@@ -216,22 +216,22 @@ namespace OnceTwoTree_game1
                 {
                     case 0:
                         {
-                            spriteBatch.Draw(P_idle, Bounds.Position, new Rectangle(108 * p_frame, P_idle.Height/2 + 5, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
+                            spriteBatch.Draw(P_idle, Bounds.Position, new Rectangle(108 * p_frame, P_idle.Height / 2 + 5, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
                             break;
                         }
                     case 1:
                         {
-                            spriteBatch.Draw(P_walk, Bounds.Position, new Rectangle(108 * p_frame, P_walk.Height/2 + 5, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
+                            spriteBatch.Draw(P_walk, Bounds.Position, new Rectangle(108 * p_frame, P_walk.Height / 2 + 5, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
                             break;
                         }
                     case 2:
                         {
-                            spriteBatch.Draw(P_climb, Bounds.Position, new Rectangle(108 * p_climbFrame,P_climb.Height/2+5, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
+                            spriteBatch.Draw(P_climb, Bounds.Position, new Rectangle(108 * p_climbFrame, P_climb.Height / 2 + 5, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
                             break;
                         }
                     case 3:
                         {
-                            spriteBatch.Draw(P_fall, Bounds.Position, new Rectangle(P_fall.Width/2 + 5, 0, 144, 108), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
+                            spriteBatch.Draw(P_fall, Bounds.Position, new Rectangle(P_fall.Width / 2 + 5, 0, 144, 108), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.None, 0);
                             break;
                         }
                 }
@@ -243,22 +243,22 @@ namespace OnceTwoTree_game1
                 {
                     case 0:
                         {
-                            spriteBatch.Draw(P_idle, Bounds.Position, new Rectangle(108 * p_frame, P_idle.Height / 2 +5, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
+                            spriteBatch.Draw(P_idle, Bounds.Position, new Rectangle(108 * p_frame, P_idle.Height / 2 + 5, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
                             break;
                         }
                     case 1:
                         {
-                            spriteBatch.Draw(P_walk, Bounds.Position, new Rectangle(108 * p_frame, (P_walk.Height / 2)+5 , 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
+                            spriteBatch.Draw(P_walk, Bounds.Position, new Rectangle(108 * p_frame, (P_walk.Height / 2) + 5, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
                             break;
                         }
                     case 2:
                         {
-                            spriteBatch.Draw(P_climb, Bounds.Position, new Rectangle(108 * p_climbFrame, P_climb.Height / 2 +5 , 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
+                            spriteBatch.Draw(P_climb, Bounds.Position, new Rectangle(108 * p_climbFrame, P_climb.Height / 2 + 5, 108, 138), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
                             break;
                         }
                     case 3:
                         {
-                            spriteBatch.Draw(P_fall, Bounds.Position, new Rectangle(P_fall.Width / 2 +5 , 0, 144, 108), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
+                            spriteBatch.Draw(P_fall, Bounds.Position, new Rectangle(P_fall.Width / 2 + 5, 0, 144, 108), Color.White, 0, Vector2.Zero, 1f, SpriteEffects.FlipHorizontally, 0);
                             break;
                         }
                 }
@@ -276,7 +276,7 @@ namespace OnceTwoTree_game1
 
             //HookDraw
             myhook.Draw(spriteBatch);
-            
+
         }
 
         public override void OnCollision(CollisionEventArgs collisionInfo)
@@ -288,13 +288,33 @@ namespace OnceTwoTree_game1
                 countG = timeCount;
                 if (!onClimb)
                 {
+                    wallCheckLeft = false;
+                    wallCheckRight = false;
                     Bounds.Position -= collisionInfo.PenetrationVector;
                 }
 
             }
 
+            else if (collisionInfo.Other.ToString().Contains("HookPointObject"))
+            {
+                if (((RectangleF)Bounds).Top > ((RectangleF)collisionInfo.Other.Bounds).Top &&
+                    ((RectangleF)Bounds).Bottom > ((RectangleF)collisionInfo.Other.Bounds).Bottom)
+                {
+
+                }
+            }
+
+            else if (collisionInfo.Other.ToString().Contains("HookBox"))
+            {
+                if (((RectangleF)Bounds).Top > ((RectangleF)collisionInfo.Other.Bounds).Top &&
+                    ((RectangleF)Bounds).Bottom > ((RectangleF)collisionInfo.Other.Bounds).Bottom)
+                {
+
+                }
+            }
+
             #region WallCollision
-            if (collisionInfo.Other.ToString().Contains("ClimbOBJ"))
+            else if (collisionInfo.Other.ToString().Contains("ClimbOBJ"))
             {
                 //Check wall on Right side of Character
                 if (((RectangleF)Bounds).Right >= ((RectangleF)collisionInfo.Other.Bounds).Left &&
@@ -314,10 +334,10 @@ namespace OnceTwoTree_game1
                             /*Bounds.Position = new Vector2(((RectangleF)collisionInfo.Other.Bounds).Position.X - ((RectangleF)collisionInfo.Other.Bounds).Size.Width,
                                                           ((RectangleF)collisionInfo.Other.Bounds).Top - ((RectangleF)Bounds).Size.Height);*/
                             onClimb = false;
-                            move = new Vector2(0, - (35)) ;
+                            move = new Vector2(0, -(35));
                             if (((RectangleF)Bounds).Position.Y - _game.GetCameraPos2Y() <= (_game.GetMapHeight() - 354))
                             {
-                                _game.UpdateCamera2Y(new Vector2(move.X,move.Y));
+                                _game.UpdateCamera2Y(new Vector2(move.X, move.Y));
                             }
                             Bounds.Position += move;
                         }
@@ -335,7 +355,7 @@ namespace OnceTwoTree_game1
                     if (onClimb)
                     {
                         isFlip = true;
-                        Bounds.Position = new Vector2(((RectangleF)collisionInfo.Other.Bounds).Position.X + (((RectangleF)collisionInfo.Other.Bounds).Size.Width * 1 / 3) -9, Bounds.Position.Y);
+                        Bounds.Position = new Vector2(((RectangleF)collisionInfo.Other.Bounds).Position.X + (((RectangleF)collisionInfo.Other.Bounds).Size.Width * 1 / 3) - 9, Bounds.Position.Y);
                         //End of Climbing
                         if (((RectangleF)Bounds).Top + (((RectangleF)Bounds).Size.Height * 3 / 4) < ((RectangleF)collisionInfo.Other.Bounds).Top)
                         {
@@ -466,7 +486,7 @@ namespace OnceTwoTree_game1
             }
             else if (onClimb == false && onAir == false)
             {
-                if (_currentKey.IsKeyDown(Keys.Right) && Bounds.Position.X  < _game.GetMapWidth() - ((RectangleF)Bounds).Width)
+                if (_currentKey.IsKeyDown(Keys.Right) && Bounds.Position.X < _game.GetMapWidth() - ((RectangleF)Bounds).Width)
                 {
                     p_stateNum = 1;
                     isFlip = false;
@@ -478,13 +498,13 @@ namespace OnceTwoTree_game1
                     }
                     Bounds.Position += move;
                 }
-                else if (_currentKey.IsKeyDown(Keys.Left) && Bounds.Position.X > _game.GetMapWidth()/2)
+                else if (_currentKey.IsKeyDown(Keys.Left) && Bounds.Position.X > _game.GetMapWidth() / 2)
                 {
                     p_stateNum = 1;
                     isFlip = true;
                     move = new Vector2(-Velocity, 0) * gameTime.GetElapsedSeconds() * 50;
                     if ((Bounds.Position.X - _game.GetCameraPos2X()) <= 4100
-                        && _game.GetCamera2X() > _game.GetMapWidth()/2 + 9f)
+                        && _game.GetCamera2X() > _game.GetMapWidth() / 2 + 9f)
                     {
                         _game.UpdateCamera2X(move);
                     }
@@ -507,7 +527,7 @@ namespace OnceTwoTree_game1
 
             }
             else if (((RectangleF)Bounds).Position.Y + 108 - _game.GetCameraPos2Y() >= (_game.GetMapHeight() - 216) &&
-                _game.GetCamera2Y()<= _game.GetMapHeight() - 972)
+                _game.GetCamera2Y() <= _game.GetMapHeight() - 972)
             {
                 move = new Vector2(0, (-Gfroce * 2)) * gameTime.GetElapsedSeconds() * 50;
                 _game.UpdateCamera2Y(move);
@@ -589,7 +609,7 @@ namespace OnceTwoTree_game1
             //Inside
             //spriteBatch.Draw(UI_insidebar, insideBarPos, new Rectangle(0, UI_insidebar.Height * frameInsideBar / 3, UI_insidebar.Width, UI_insidebar.Height / 3), Color.White);
             //Half
-            spriteBatch.Draw(UI_half, halfPos, new Rectangle(UI_half.Width/2, 0, UI_half.Width/ 2, UI_half.Height), Color.White);
+            spriteBatch.Draw(UI_half, halfPos, new Rectangle(UI_half.Width / 2, 0, UI_half.Width / 2, UI_half.Height), Color.White);
         }
         public void SkillCheck(GameTime gameTime)
         {
@@ -691,7 +711,14 @@ namespace OnceTwoTree_game1
 
         }
         #endregion
+
+        //ขออนุญาต
+        public override bool GetOnClimb()
+        {
+            return onClimb;
+        }
     }
+
 
 
 
