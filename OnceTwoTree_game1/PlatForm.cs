@@ -32,9 +32,7 @@ namespace OnceTwoTree_game1
 
             spriteBatch.DrawRectangle((RectangleF)Bounds, Color.Green, 3);
         }
-
         
-
         public void OnCollision(CollisionEventArgs collisionInfo)
         {
 

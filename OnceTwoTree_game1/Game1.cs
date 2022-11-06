@@ -437,7 +437,8 @@ namespace OnceTwoTree_game1
                     spriteBatch.DrawString(font, "Dcount = " + (playerInstance1.timeCount - playerInstance1.countG), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 250), Color.Black);
                     spriteBatch.DrawString(font, "FirstCheck = " + (playerInstance1.firstCheck), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 270), Color.Black);
                     spriteBatch.DrawString(font, "Energy = " + (playerInstance1.energy), new Vector2(_panelPos1.X + 10, _panelPos1.Y + 290), Color.Black);
-                    spriteBatch.DrawString(font, "Throwstate = " + (playerInstance1.myhook._myTime), new Vector2(_panelPos1.X + 270, _panelPos1.Y + 290), Color.Black);
+                    spriteBatch.DrawString(font, "Throwstate = " + (HookBox._Hookboxes[0].Bounds.Position), new Vector2(_panelPos1.X + 270, _panelPos1.Y + 290), Color.Black);
+                    spriteBatch.DrawString(font, "Throwstate = " + (HookBox._Hookboxes[0].throw_state), new Vector2(_panelPos1.X + 270, _panelPos1.Y + 270), Color.Black);
 
                 }
 
@@ -475,7 +476,8 @@ namespace OnceTwoTree_game1
                     spriteBatch.DrawString(font, "Dcount = " + (playerInstance2.timeCount - playerInstance2.countG), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 250), Color.Black);
                     spriteBatch.DrawString(font, "FirstCheck = " + (playerInstance2.firstCheck), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 270), Color.Black);
                     spriteBatch.DrawString(font, "Energy = " + (playerInstance2.energy), new Vector2(_panelPos2.X + 10, _panelPos2.Y + 290), Color.Black);
-                    spriteBatch.DrawString(font, "Throwstate = " + (playerInstance2.myhook._myTime), new Vector2(_panelPos2.X + 270, _panelPos2.Y + 290), Color.Black);
+                    spriteBatch.DrawString(font, "Throwstate = " + (HookBox._Hookboxes[1].Bounds.Position), new Vector2(_panelPos2.X + 270, _panelPos2.Y + 290), Color.Black);
+                    spriteBatch.DrawString(font, "Throwstate = " + (HookBox._Hookboxes[1].throw_state), new Vector2(_panelPos2.X + 270, _panelPos2.Y + 270), Color.Black);
 
                 }
             }
