@@ -306,13 +306,19 @@ namespace OnceTwoTree_game1
                     if (onClimb)
                     {
                         isFlip = false;
-                        Bounds.Position = new Vector2(((RectangleF)collisionInfo.Other.Bounds).Position.X - ((RectangleF)collisionInfo.Other.Bounds).Size.Width - 15, Bounds.Position.Y);
+                        Bounds.Position = new Vector2(((RectangleF)collisionInfo.Other.Bounds).Position.X - ((RectangleF)collisionInfo.Other.Bounds).Size.Width + 9, Bounds.Position.Y);
                         //End of Climbing
                         if (((RectangleF)Bounds).Top + (((RectangleF)Bounds).Size.Height * 3 / 4) < ((RectangleF)collisionInfo.Other.Bounds).Top)
                         {
-                            Bounds.Position = new Vector2(((RectangleF)collisionInfo.Other.Bounds).Position.X - ((RectangleF)collisionInfo.Other.Bounds).Size.Width,
-                                                          ((RectangleF)collisionInfo.Other.Bounds).Top - ((RectangleF)Bounds).Size.Height);
+                            /*Bounds.Position = new Vector2(((RectangleF)collisionInfo.Other.Bounds).Position.X - ((RectangleF)collisionInfo.Other.Bounds).Size.Width,
+                                                          ((RectangleF)collisionInfo.Other.Bounds).Top - ((RectangleF)Bounds).Size.Height);*/
                             onClimb = false;
+                            move = new Vector2(0, -(35));
+                            if (((RectangleF)Bounds).Position.Y - _game.GetCameraPos1Y() <= (_game.GetMapHeight() - 354))
+                            {
+                                _game.UpdateCamera1Y(new Vector2(move.X, move.Y));
+                            }
+                            Bounds.Position += move;
                         }
                     }
                 }
@@ -321,20 +327,26 @@ namespace OnceTwoTree_game1
                 if (((RectangleF)Bounds).Left <= ((RectangleF)collisionInfo.Other.Bounds).Right &&
                     ((RectangleF)Bounds).Right > ((RectangleF)collisionInfo.Other.Bounds).Right &&
                     ((RectangleF)Bounds).Bottom - 10 >= ((RectangleF)collisionInfo.Other.Bounds).Top &&
-                    ((RectangleF)Bounds).Bottom - 10d <= ((RectangleF)collisionInfo.Other.Bounds).Bottom)
+                    ((RectangleF)Bounds).Bottom - 10 <= ((RectangleF)collisionInfo.Other.Bounds).Bottom)
                 {
                     countW++;
                     wallCheckLeft = true;
                     if (onClimb)
                     {
                         isFlip = true;
-                        Bounds.Position = new Vector2(((RectangleF)collisionInfo.Other.Bounds).Position.X + (((RectangleF)collisionInfo.Other.Bounds).Size.Width * 1 / 3), Bounds.Position.Y);
+                        Bounds.Position = new Vector2(((RectangleF)collisionInfo.Other.Bounds).Position.X + (((RectangleF)collisionInfo.Other.Bounds).Size.Width * 1 / 3)-9, Bounds.Position.Y);
                         //End of Climbing
                         if (((RectangleF)Bounds).Top + (((RectangleF)Bounds).Size.Height * 3 / 4) < ((RectangleF)collisionInfo.Other.Bounds).Top)
                         {
-                            Bounds.Position = new Vector2(((RectangleF)collisionInfo.Other.Bounds).Position.X + (((RectangleF)collisionInfo.Other.Bounds).Size.Width * 1 / 3),
-                                                          ((RectangleF)collisionInfo.Other.Bounds).Top - ((RectangleF)Bounds).Size.Height);
+                            /*Bounds.Position = new Vector2(((RectangleF)collisionInfo.Other.Bounds).Position.X + (((RectangleF)collisionInfo.Other.Bounds).Size.Width * 1 / 3),
+                                                          ((RectangleF)collisionInfo.Other.Bounds).Top - ((RectangleF)Bounds).Size.Height);*/
                             onClimb = false;
+                            move = new Vector2(0, -(35));
+                            if (((RectangleF)Bounds).Position.Y - _game.GetCameraPos1Y() <= (_game.GetMapHeight() - 354))
+                            {
+                                _game.UpdateCamera1Y(new Vector2(move.X, move.Y));
+                            }
+                            Bounds.Position += move;
                         }
                     }
                 }
@@ -406,7 +418,7 @@ namespace OnceTwoTree_game1
                         if(p_climbFrame == 0) { p_climbFrame = 1; }
                         else if (p_climbFrame ==1) { p_climbFrame = 0; }
                         move = new Vector2(0, Velocity) * gameTime.GetElapsedSeconds() * 100;
-                        if (_game.GetCameraPos1Y() - Bounds.Position.Y <= 864)
+                        if (((RectangleF)Bounds).Position.Y - _game.GetCameraPos1Y() <= (_game.GetMapHeight() - 354))
                         {
                             _game.UpdateCamera1Y(move);
                         }
@@ -416,7 +428,8 @@ namespace OnceTwoTree_game1
                     {
                         energy -= staminaCost;
                         move = new Vector2(0, -Velocity) * gameTime.GetElapsedSeconds() * 100;
-                        if (_game.GetCameraPos1Y() - Bounds.Position.Y <= 864)
+                        if (((RectangleF)Bounds).Position.Y + 108 - _game.GetCameraPos1Y() >= (_game.GetMapHeight() - 216) &&
+                            _game.GetCamera1Y() <= _game.GetMapHeight() - 972)
                         {
                             _game.UpdateCamera1Y(move);
                         }
@@ -432,7 +445,7 @@ namespace OnceTwoTree_game1
                         if (p_climbFrame == 0) { p_climbFrame = 1; }
                         else if (p_climbFrame == 1) { p_climbFrame = 0; }
                         move = new Vector2(0, Velocity) * gameTime.GetElapsedSeconds() * 100;
-                        if (_game.GetCameraPos1Y() - Bounds.Position.Y <= 864)
+                        if (((RectangleF)Bounds).Position.Y - _game.GetCameraPos1Y() <= (_game.GetMapHeight() - 354))
                         {
                             _game.UpdateCamera1Y(move);
                         }
@@ -442,7 +455,8 @@ namespace OnceTwoTree_game1
                     {
                         energy -= staminaCost;
                         move = new Vector2(0, -Velocity) * gameTime.GetElapsedSeconds() * 100;
-                        if (_game.GetCameraPos1Y() - Bounds.Position.Y <= 864)
+                        if (((RectangleF)Bounds).Position.Y + 108 - _game.GetCameraPos1Y() >= (_game.GetMapHeight() - 216) &&
+                            _game.GetCamera1Y() <= _game.GetMapHeight() - 972)
                         {
                             _game.UpdateCamera1Y(move);
                         }
@@ -452,7 +466,7 @@ namespace OnceTwoTree_game1
             }
             else if (onClimb == false && onAir == false)
             {
-                if (_currentKey.IsKeyDown(Keys.D) && Bounds.Position.X < _game.GetMapWidth() - ((RectangleF)Bounds).Width)
+                if (_currentKey.IsKeyDown(Keys.D) && Bounds.Position.X < (_game.GetMapWidth()/2) - ((RectangleF)Bounds).Width)
                 {
                     p_stateNum = 1;
                     isFlip = false;
@@ -487,13 +501,14 @@ namespace OnceTwoTree_game1
             if (_currentKey.IsKeyDown(Keys.W) && onClimb == true)
             {
                 move = new Vector2(0, 10) * gameTime.GetElapsedSeconds() * 60;
-                if (_game.GetCameraPos1Y() - Bounds.Position.Y <= 864)
+                if (((RectangleF)Bounds).Position.Y - _game.GetCameraPos1Y() <= (_game.GetMapHeight() - 354))
                 {
                     _game.UpdateCamera1Y(move);
                 }
 
             }
-            else if (Bounds.Position.Y + 108 - _game.GetCameraPos1Y() >= (_game.GetMapHeight() - 216))
+            else if (((RectangleF)Bounds).Position.Y + 108 - _game.GetCameraPos1Y() >= (_game.GetMapHeight() - 216) &&
+                        _game.GetCamera1Y() <= _game.GetMapHeight() - 972)
             {
                 move = new Vector2(0, (-Gfroce * 2)) * gameTime.GetElapsedSeconds() * 50;
                 _game.UpdateCamera1Y(move);

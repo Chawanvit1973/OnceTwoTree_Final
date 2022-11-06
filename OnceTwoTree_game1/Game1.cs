@@ -20,6 +20,7 @@ namespace OnceTwoTree_game1
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
 
+        public GameTime gametimeUse;
         private const int MapWidth = 4536;
         private const int MapHeight = 4320;
 
@@ -314,6 +315,7 @@ namespace OnceTwoTree_game1
         public void InGameUpdate(GameTime gameTime)
         {
             _currentKey = Keyboard.GetState();
+            gametimeUse = gameTime;
             //Open Panel
             if (_currentKey.IsKeyDown(Keys.NumPad1) && _oldKey.IsKeyUp(Keys.NumPad1))
             {
@@ -355,7 +357,7 @@ namespace OnceTwoTree_game1
             _camera1.LookAt(_bgPosition1 + _cameraPosition1);
             playerInstance1.SetSkillCheckPos(_camera1.Position);
             playerInstance1.SkillCheck(gameTime);
-            _panelPos1 = new Vector2(_camera1.Position.X , _camera1.Position.Y + Window.ClientBounds.Height - 324);
+            _panelPos1 = new Vector2(_camera1.Position.X , _camera1.Position.Y + graphics.PreferredBackBufferHeight - 324);
 
             _camera2.LookAt(_bgPosition2 + _cameraPosition2);
             playerInstance2.SetSkillCheckPos(_camera2.Position);
@@ -376,10 +378,20 @@ namespace OnceTwoTree_game1
                 isMenu = false;
                 isGameplay = true;
             }
+            if (Keyboard.GetState().IsKeyDown(Keys.Enter))
+            {
+                isMenu = false;
+                isGameplay = true;
+            }
         }
         public void UpdateGameplay()
         {
             if (Mouse.GetState().RightButton == ButtonState.Pressed)
+            {
+                isMenu = true;
+                isGameplay = false;
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
                 isMenu = true;
                 isGameplay = false;
