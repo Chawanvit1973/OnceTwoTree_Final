@@ -119,7 +119,7 @@ namespace OnceTwoTree_game1
             maxTime = 0.5f;
             maxEnergy = 100;
             energy = maxEnergy;
-            tiredZone = 15;
+            tiredZone = 10;
             staminaCost = 5;
             energyBar = UI_energy.Height;
             maxEnergyBar = UI_energy.Height;
@@ -278,7 +278,7 @@ namespace OnceTwoTree_game1
                                            new Rectangle(framePopup * UI_popup.Width, 0, UI_popup.Width / 2, UI_popup.Height), Color.White);
             }
             DrawSkilCheck(spriteBatch);
-            spriteBatch.DrawRectangle((RectangleF)Bounds, Color.Red, 3f);
+            //spriteBatch.DrawRectangle((RectangleF)Bounds, Color.Red, 3f);
 
             //HookDraw
             myhook.Draw(spriteBatch);
@@ -399,10 +399,10 @@ namespace OnceTwoTree_game1
                 }
                 else { wallCheckLeft = false;}
             }
-            else { wallCheckRight = false; wallCheckLeft = false; }
+            else { wallCheckRight = false; wallCheckLeft = false; onWeb = false;  onBroken = false; }
             #endregion
 
-            
+
         }
 
         public void TimeCount(float elapsed)
@@ -456,70 +456,113 @@ namespace OnceTwoTree_game1
             {
                 Velocity = 20;
                 p_stateNum = 2;
-                if (_currentKey.IsKeyDown(Keys.A) && _oldKey.IsKeyUp(Keys.A))
+                if (myhook._ishooking)
                 {
-                    if (leftHand == true && triggerRec.Intersects(scLRec) && energy / maxEnergy * 100 > tiredZone)
+                    if (_currentKey.IsKeyDown(Keys.A) && _oldKey.IsKeyUp(Keys.A))
                     {
-                        energy -= staminaCost;
-                        leftHand = false;
-                        if (p_climbFrame == 0) { p_climbFrame = 1; }
-                        else if (p_climbFrame == 1) { p_climbFrame = 0; }
-                        move = new Vector2(0, Velocity) * gameTime.GetElapsedSeconds() * 100;
-                        if (((RectangleF)Bounds).Position.Y - _game.GetCameraPos1Y() <= (_game.GetMapHeight() - 354))
+                        if (leftHand == true && energy / maxEnergy * 100 > tiredZone)
                         {
-                            _game.UpdateCamera1Y(move);
+                            //energy -= staminaCost;
+                            leftHand = false;
+                            if (p_climbFrame == 0) { p_climbFrame = 1; }
+                            else if (p_climbFrame == 1) { p_climbFrame = 0; }
+                            move = new Vector2(0, Velocity) * gameTime.GetElapsedSeconds() * 100;
+                            if (((RectangleF)Bounds).Position.Y - _game.GetCameraPos1Y() <= (_game.GetMapHeight() - 354))
+                            {
+                                _game.UpdateCamera1Y(move);
+                            }
+                            Bounds.Position -= move;
                         }
-                        Bounds.Position -= move;
+                       
+
                     }
-                    if (triggerRec.Intersects(dropRec))
+                    else if (_currentKey.IsKeyDown(Keys.D) && _oldKey.IsKeyUp(Keys.D))
                     {
-                        energy -= staminaCost;
-                        move = new Vector2(0, -Velocity) * gameTime.GetElapsedSeconds() * 100;
-                        if (((RectangleF)Bounds).Position.Y + 108 - _game.GetCameraPos1Y() >= (_game.GetMapHeight() - 216) &&
-                            _game.GetCamera1Y() <= _game.GetMapHeight() - 972)
+                        if (leftHand == false &&  energy / maxEnergy * 100 > tiredZone)
                         {
-                            _game.UpdateCamera1Y(move);
+                            //energy -= staminaCost;
+                            leftHand = true;
+                            if (p_climbFrame == 0) { p_climbFrame = 1; }
+                            else if (p_climbFrame == 1) { p_climbFrame = 0; }
+                            move = new Vector2(0, Velocity) * gameTime.GetElapsedSeconds() * 100;
+                            if (((RectangleF)Bounds).Position.Y - _game.GetCameraPos1Y() <= (_game.GetMapHeight() - 354))
+                            {
+                                _game.UpdateCamera1Y(move);
+                            }
+                            Bounds.Position -= move;
                         }
-                        Bounds.Position -= move;
-                        if (onBroken)
-                        {
-                            onClimb = false;
-                        }
+                        
+
                     }
-                    
                 }
-                else if (_currentKey.IsKeyDown(Keys.D) && _oldKey.IsKeyUp(Keys.D))
+                else if (!myhook._ishooking)
                 {
-                    if (leftHand == false && triggerRec.Intersects(scRRec) && energy / maxEnergy * 100 > tiredZone)
+                    if (_currentKey.IsKeyDown(Keys.A) && _oldKey.IsKeyUp(Keys.A))
                     {
-                        energy -= staminaCost;
-                        leftHand = true;
-                        if (p_climbFrame == 0) { p_climbFrame = 1; }
-                        else if (p_climbFrame == 1) { p_climbFrame = 0; }
-                        move = new Vector2(0, Velocity) * gameTime.GetElapsedSeconds() * 100;
-                        if (((RectangleF)Bounds).Position.Y - _game.GetCameraPos1Y() <= (_game.GetMapHeight() - 354))
+                        if (leftHand == true && triggerRec.Intersects(scLRec) && energy / maxEnergy * 100 > tiredZone)
                         {
-                            _game.UpdateCamera1Y(move);
+                            energy -= staminaCost;
+                            leftHand = false;
+                            if (p_climbFrame == 0) { p_climbFrame = 1; }
+                            else if (p_climbFrame == 1) { p_climbFrame = 0; }
+                            move = new Vector2(0, Velocity) * gameTime.GetElapsedSeconds() * 100;
+                            if (((RectangleF)Bounds).Position.Y - _game.GetCameraPos1Y() <= (_game.GetMapHeight() - 354))
+                            {
+                                _game.UpdateCamera1Y(move);
+                            }
+                            Bounds.Position -= move;
                         }
-                        Bounds.Position -= move;
+                        if (triggerRec.Intersects(dropRec))
+                        {
+                            energy -= staminaCost;
+                            move = new Vector2(0, -Velocity) * gameTime.GetElapsedSeconds() * 100;
+                            if (((RectangleF)Bounds).Position.Y + 108 - _game.GetCameraPos1Y() >= (_game.GetMapHeight() - 216) &&
+                                _game.GetCamera1Y() <= _game.GetMapHeight() - 972)
+                            {
+                                _game.UpdateCamera1Y(move);
+                            }
+                            Bounds.Position -= move;
+                            if (onBroken && !myhook._ishooking)
+                            {
+                                onClimb = false;
+                            }
+                        }
+
                     }
-                    if (triggerRec.Intersects(dropRec))
+                    else if (_currentKey.IsKeyDown(Keys.D) && _oldKey.IsKeyUp(Keys.D))
                     {
-                        energy -= staminaCost;
-                        move = new Vector2(0, -Velocity) * gameTime.GetElapsedSeconds() * 100;
-                        if (((RectangleF)Bounds).Position.Y + 108 - _game.GetCameraPos1Y() >= (_game.GetMapHeight() - 216) &&
-                            _game.GetCamera1Y() <= _game.GetMapHeight() - 972)
+                        if (leftHand == false && triggerRec.Intersects(scRRec) && energy / maxEnergy * 100 > tiredZone)
                         {
-                            _game.UpdateCamera1Y(move);
+                            energy -= staminaCost;
+                            leftHand = true;
+                            if (p_climbFrame == 0) { p_climbFrame = 1; }
+                            else if (p_climbFrame == 1) { p_climbFrame = 0; }
+                            move = new Vector2(0, Velocity) * gameTime.GetElapsedSeconds() * 100;
+                            if (((RectangleF)Bounds).Position.Y - _game.GetCameraPos1Y() <= (_game.GetMapHeight() - 354))
+                            {
+                                _game.UpdateCamera1Y(move);
+                            }
+                            Bounds.Position -= move;
                         }
-                        Bounds.Position -= move;
-                        if (onBroken)
+                        if (triggerRec.Intersects(dropRec))
                         {
-                            onClimb = false;
+                            energy -= staminaCost;
+                            move = new Vector2(0, -Velocity) * gameTime.GetElapsedSeconds() * 100;
+                            if (((RectangleF)Bounds).Position.Y + 108 - _game.GetCameraPos1Y() >= (_game.GetMapHeight() - 216) &&
+                                _game.GetCamera1Y() <= _game.GetMapHeight() - 972)
+                            {
+                                _game.UpdateCamera1Y(move);
+                            }
+                            Bounds.Position -= move;
+                            if (onBroken && !myhook._ishooking)
+                            {
+                                onClimb = false;
+                            }
                         }
+
                     }
-                   
                 }
+                
             }
             else if (onClimb == false && onAir == false)
             {
@@ -647,6 +690,11 @@ namespace OnceTwoTree_game1
                 {
                     spriteBatch.Draw(UI_bar, barPos, new Rectangle(0, UI_bar.Height / 2, UI_bar.Width, UI_bar.Height / 2), Color.White);
                 }
+                //Rope
+                if (myhook._ishooking)
+                {
+                    spriteBatch.Draw(UI_insidebar, insideBarPos, new Rectangle(0, UI_insidebar.Height * 1 / 3, UI_insidebar.Width, UI_insidebar.Height / 3), Color.White);
+                }
             }
             //Stamina
             spriteBatch.Draw(UI_stamina, staminaPos, new Rectangle(0, 0, UI_stamina.Width, UI_stamina.Height), Color.White);
@@ -677,10 +725,27 @@ namespace OnceTwoTree_game1
 
                 if (triggerRec.Intersects(barRec))
                 {
-                    if (triggerRec.Left + triggerSpeed <= barRec.Left ||
-                        triggerRec.Right + triggerSpeed >= barRec.Right)
+                    if (onWeb)
                     {
-                        triggerSpeed *= -1;
+                        if (triggerRec.Left + triggerSpeed <= barRec.Left)
+                        {
+                            triggerSpeed = 5;
+                        }
+                        else if (triggerRec.Right + triggerSpeed >= barRec.Right)
+                        {
+                            triggerSpeed = -5;
+                        }
+                    }
+                    else if (!onWeb)
+                    {
+                        if (triggerRec.Left + triggerSpeed <= barRec.Left)
+                        {
+                            triggerSpeed = 15;
+                        }
+                        else if (triggerRec.Right + triggerSpeed >= barRec.Right)
+                        {
+                            triggerSpeed = -15;
+                        }
                     }
 
                 }
