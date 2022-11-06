@@ -475,7 +475,12 @@ namespace OnceTwoTree_game1
                             _game.UpdateCamera2Y(move);
                         }
                         Bounds.Position -= move;
+                        if (onBroken)
+                        {
+                            onClimb = false;
+                        }
                     }
+                }
                 }
                 else if (_currentKey.IsKeyDown(Keys.Right) && _oldKey.IsKeyUp(Keys.Right))
                 {
@@ -502,9 +507,9 @@ namespace OnceTwoTree_game1
                             _game.UpdateCamera2Y(move);
                         }
                         Bounds.Position -= move;
+
                     }
-                }
-            }
+                } 
             else if (onClimb == false && onAir == false)
             {
                 Velocity = 10;
